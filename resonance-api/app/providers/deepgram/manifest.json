@@ -1,0 +1,41 @@
+{
+  "id": "deepgram",
+  "name": "Deepgram",
+  "mono": "Dg",
+  "env": ["DEEPGRAM_API_KEY"],
+  "modes": {
+    "tts": {
+      "tag": "Aura · low-latency TTS",
+      "max_chars": 2000,
+      "models": ["aura-2", "aura"],
+      "voices": {"source": "static", "items": [
+        {"id": "aura-2-thalia-en", "name": "Thalia", "desc": "English · F", "models": ["aura-2"]},
+        {"id": "aura-2-andromeda-en", "name": "Andromeda", "desc": "English · F", "models": ["aura-2"]},
+        {"id": "aura-2-helena-en", "name": "Helena", "desc": "English · F", "models": ["aura-2"]},
+        {"id": "aura-2-apollo-en", "name": "Apollo", "desc": "English · M", "models": ["aura-2"]},
+        {"id": "aura-2-arcas-en", "name": "Arcas", "desc": "English · M", "models": ["aura-2"]},
+        {"id": "aura-2-aries-en", "name": "Aries", "desc": "English · M", "models": ["aura-2"]},
+        {"id": "aura-2-celeste-es", "name": "Celeste", "desc": "Spanish · F", "models": ["aura-2"]},
+        {"id": "aura-asteria-en", "name": "Asteria", "desc": "English · F", "models": ["aura"]},
+        {"id": "aura-luna-en", "name": "Luna", "desc": "English · F", "models": ["aura"]},
+        {"id": "aura-orion-en", "name": "Orion", "desc": "English · M", "models": ["aura"]},
+        {"id": "aura-arcas-en", "name": "Arcas", "desc": "English · M", "models": ["aura"]}
+      ]},
+      "params": [
+        {"key": "encoding", "label": "Encoding", "type": "enum", "options": ["mp3", "linear16", "opus", "flac"], "default": "mp3"}
+      ]
+    },
+    "stt": {
+      "tag": "Nova ASR",
+      "models": ["nova-3", "nova-2"],
+      "params": [
+        {"key": "language", "label": "Language", "type": "enum", "options": ["multi", "en", "en-IN", "hi", "es", "fr", "de"], "default": "multi", "promote": true},
+        {"key": "smart_format", "label": "Smart format", "type": "bool", "default": true},
+        {"key": "punctuate", "label": "Punctuation", "type": "bool", "default": true},
+        {"key": "diarize", "label": "Speaker labels", "type": "bool", "default": true},
+        {"key": "filler_words", "label": "Filler words", "type": "bool", "default": false},
+        {"key": "keyterm", "label": "Key terms", "type": "text", "placeholder": "Comma-separated terms to boost", "default": "", "models": ["nova-3"]}
+      ]
+    }
+  }
+}

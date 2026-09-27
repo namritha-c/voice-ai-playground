@@ -1,0 +1,29 @@
+{
+  "id": "cartesia",
+  "name": "Cartesia",
+  "mono": "Ca",
+  "env": ["CARTESIA_API_KEY"],
+  "modes": {
+    "tts": {
+      "tag": "Sonic · emotive, low latency",
+      "max_chars": 5000,
+      "models": ["sonic-3", "sonic-2", "sonic-turbo"],
+      "voices": {"source": "dynamic", "items": [
+        {"id": "a0e99841-438c-4a64-b679-ae501e7d6091", "name": "Barbershop Man", "desc": "English · M"}
+      ]},
+      "params": [
+        {"key": "language", "label": "Language", "type": "enum", "options": ["en", "hi", "es", "fr", "de", "ja", "pt"], "default": "en", "promote": true},
+        {"key": "emotion", "label": "Emotion", "type": "enum", "options": ["neutral", "happy", "excited", "content", "sad", "angry", "scared", "curious"], "default": "neutral"},
+        {"key": "speed", "label": "Speed", "type": "range", "min": 0.6, "max": 1.5, "step": 0.05, "default": 1, "unit": "×"},
+        {"key": "volume", "label": "Volume", "type": "range", "min": 0.5, "max": 2, "step": 0.05, "default": 1, "models": ["sonic-3"]}
+      ]
+    },
+    "stt": {
+      "tag": "Ink · streaming-grade ASR",
+      "models": ["ink-whisper"],
+      "params": [
+        {"key": "language", "label": "Language", "type": "enum", "options": ["en", "hi", "es", "fr", "de", "ja", "pt"], "default": "en", "promote": true}
+      ]
+    }
+  }
+}

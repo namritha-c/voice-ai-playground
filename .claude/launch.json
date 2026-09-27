@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "resonance-api",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /home/namritha/AI_RD/voice_ai_playground/resonance-api && uv run uvicorn app.main:app --reload --port 8000"],
+      "port": 8000
+    },
+    {
+      "name": "resonance-web",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /home/namritha/AI_RD/voice_ai_playground/resonance-web && npm run dev"],
+      "port": 5173
+    }
+  ]
+}

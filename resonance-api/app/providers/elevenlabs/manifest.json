@@ -1,0 +1,56 @@
+{
+  "id": "elevenlabs",
+  "name": "ElevenLabs",
+  "mono": "11",
+  "env": ["ELEVENLABS_API_KEY"],
+  "modes": {
+    "tts": {
+      "tag": "Multilingual · streaming",
+      "max_chars": 5000,
+      "models": ["eleven_multilingual_v2", "eleven_flash_v2_5", "eleven_turbo_v2_5", "eleven_v3"],
+      "voices": {
+        "source": "dynamic",
+        "items": [
+          {"id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "desc": "Calm · narration"},
+          {"id": "pNInz6obpgDQGcFmaJgB", "name": "Adam", "desc": "Deep · narration"},
+          {"id": "ErXwobaYiN019PkySvjV", "name": "Antoni", "desc": "Warm · conversational"},
+          {"id": "EXAVITQu4vr4xnSDxMaL", "name": "Bella", "desc": "Soft · expressive"},
+          {"id": "AZnzlk1XvdvUeBnXmlld", "name": "Domi", "desc": "Strong · confident"},
+          {"id": "MF3mGyEYCl7XYWbV9V6O", "name": "Elli", "desc": "Bright · youthful"}
+        ]
+      },
+      "params": [
+        {"key": "stability", "label": "Stability", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0.5},
+        {"key": "similarity_boost", "label": "Similarity", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0.75},
+        {"key": "style", "label": "Style exaggeration", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0},
+        {"key": "speed", "label": "Speed", "type": "range", "min": 0.7, "max": 1.2, "step": 0.05, "default": 1, "unit": "×"},
+        {"key": "use_speaker_boost", "label": "Speaker boost", "type": "bool", "default": true},
+        {"key": "output_format", "label": "Format", "type": "enum", "options": ["mp3_44100_128", "mp3_22050_32", "pcm_16000"], "default": "mp3_44100_128"}
+      ]
+    },
+    "stt": {
+      "tag": "Scribe",
+      "models": ["scribe_v1", "scribe_v1_experimental"],
+      "params": [
+        {"key": "language_code", "label": "Language", "type": "enum", "options": ["auto", "en", "hi", "ml", "ta", "es", "fr", "de"], "default": "auto", "promote": true},
+        {"key": "diarize", "label": "Speaker labels", "type": "bool", "default": false},
+        {"key": "tag_audio_events", "label": "Tag audio events", "type": "bool", "default": true}
+      ]
+    },
+    "sts": {
+      "tag": "Voice changer",
+      "models": ["eleven_multilingual_sts_v2", "eleven_english_sts_v2"],
+      "voices": {"source": "dynamic", "items": [
+        {"id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "desc": "Calm · narration"},
+        {"id": "pNInz6obpgDQGcFmaJgB", "name": "Adam", "desc": "Deep · narration"},
+        {"id": "ErXwobaYiN019PkySvjV", "name": "Antoni", "desc": "Warm · conversational"},
+        {"id": "EXAVITQu4vr4xnSDxMaL", "name": "Bella", "desc": "Soft · expressive"}
+      ]},
+      "params": [
+        {"key": "stability", "label": "Stability", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0.5},
+        {"key": "similarity_boost", "label": "Similarity", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0.75},
+        {"key": "remove_background_noise", "label": "Remove background noise", "type": "bool", "default": false}
+      ]
+    }
+  }
+}

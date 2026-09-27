@@ -1,0 +1,37 @@
+{
+  "id": "sarvam",
+  "name": "Sarvam AI",
+  "mono": "Sv",
+  "env": ["SARVAM_API_KEY"],
+  "modes": {
+    "tts": {
+      "tag": "Indic languages",
+      "max_chars": 1500,
+      "models": ["bulbul:v2"],
+      "voices": {"source": "static", "items": [
+        {"id": "anushka", "name": "Anushka", "desc": "Indic · F"},
+        {"id": "manisha", "name": "Manisha", "desc": "Indic · F"},
+        {"id": "vidya", "name": "Vidya", "desc": "Indic · F"},
+        {"id": "arya", "name": "Arya", "desc": "Indic · F"},
+        {"id": "abhilash", "name": "Abhilash", "desc": "Indic · M"},
+        {"id": "karun", "name": "Karun", "desc": "Indic · M"},
+        {"id": "hitesh", "name": "Hitesh", "desc": "Indic · M"}
+      ]},
+      "params": [
+        {"key": "target_language_code", "label": "Language", "type": "enum", "options": ["en-IN", "hi-IN", "ml-IN", "ta-IN", "te-IN", "kn-IN", "bn-IN", "mr-IN", "gu-IN", "pa-IN", "od-IN"], "default": "en-IN", "promote": true},
+        {"key": "pace", "label": "Pace", "type": "range", "min": 0.3, "max": 3, "step": 0.1, "default": 1, "unit": "×"},
+        {"key": "pitch", "label": "Pitch", "type": "range", "min": -0.75, "max": 0.75, "step": 0.05, "default": 0},
+        {"key": "loudness", "label": "Loudness", "type": "range", "min": 0.3, "max": 3, "step": 0.1, "default": 1},
+        {"key": "enable_preprocessing", "label": "Normalise numbers & mixed script", "type": "bool", "default": true}
+      ]
+    },
+    "stt": {
+      "tag": "Saarika · Indic ASR",
+      "models": ["saarika:v2.5", "saarika:v2"],
+      "params": [
+        {"key": "language_code", "label": "Language", "type": "enum", "options": ["unknown", "en-IN", "hi-IN", "ml-IN", "ta-IN", "te-IN", "kn-IN", "bn-IN", "mr-IN", "gu-IN", "pa-IN", "od-IN"], "default": "unknown", "promote": true},
+        {"key": "with_timestamps", "label": "Word timestamps", "type": "bool", "default": false}
+      ]
+    }
+  }
+}

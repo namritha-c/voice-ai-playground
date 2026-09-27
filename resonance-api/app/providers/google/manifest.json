@@ -1,0 +1,40 @@
+{
+  "id": "google",
+  "name": "Google Cloud",
+  "mono": "Gc",
+  "env": ["GOOGLE_APPLICATION_CREDENTIALS"],
+  "modes": {
+    "tts": {
+      "tag": "Neural2 · WaveNet · Chirp 3",
+      "max_chars": 5000,
+      "models": ["Neural2", "WaveNet", "Chirp3-HD"],
+      "voices": {"source": "static", "items": [
+        {"id": "en-IN-Neural2-A", "name": "Neural2-A", "desc": "English (India) · F", "models": ["Neural2"]},
+        {"id": "en-IN-Neural2-B", "name": "Neural2-B", "desc": "English (India) · M", "models": ["Neural2"]},
+        {"id": "en-US-Neural2-F", "name": "Neural2-F", "desc": "English (US) · F", "models": ["Neural2"]},
+        {"id": "en-US-Neural2-J", "name": "Neural2-J", "desc": "English (US) · M", "models": ["Neural2"]},
+        {"id": "hi-IN-Neural2-A", "name": "Neural2-A", "desc": "Hindi · F", "models": ["Neural2"]},
+        {"id": "ml-IN-Wavenet-A", "name": "Wavenet-A", "desc": "Malayalam · F", "models": ["WaveNet"]},
+        {"id": "ml-IN-Wavenet-B", "name": "Wavenet-B", "desc": "Malayalam · M", "models": ["WaveNet"]},
+        {"id": "en-IN-Wavenet-D", "name": "Wavenet-D", "desc": "English (India) · F", "models": ["WaveNet"]},
+        {"id": "en-US-Chirp3-HD-Aoede", "name": "Aoede", "desc": "English (US) · F", "models": ["Chirp3-HD"]},
+        {"id": "en-US-Chirp3-HD-Charon", "name": "Charon", "desc": "English (US) · M", "models": ["Chirp3-HD"]},
+        {"id": "en-IN-Chirp3-HD-Kore", "name": "Kore", "desc": "English (India) · F", "models": ["Chirp3-HD"]},
+        {"id": "hi-IN-Chirp3-HD-Puck", "name": "Puck", "desc": "Hindi · M", "models": ["Chirp3-HD"]}
+      ]},
+      "params": [
+        {"key": "speakingRate", "label": "Speaking rate", "type": "range", "min": 0.25, "max": 4, "step": 0.05, "default": 1, "unit": "×"},
+        {"key": "pitch", "label": "Pitch", "type": "range", "min": -20, "max": 20, "step": 1, "default": 0, "models": ["Neural2", "WaveNet"]}
+      ]
+    },
+    "stt": {
+      "tag": "Speech-to-Text v2",
+      "models": ["chirp_2", "long", "short"],
+      "params": [
+        {"key": "language_codes", "label": "Language", "type": "enum", "options": ["en-IN", "en-US", "hi-IN", "ml-IN", "ta-IN"], "default": "en-IN", "promote": true},
+        {"key": "enable_automatic_punctuation", "label": "Auto punctuation", "type": "bool", "default": true},
+        {"key": "enable_word_time_offsets", "label": "Word timestamps", "type": "bool", "default": true}
+      ]
+    }
+  }
+}

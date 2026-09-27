@@ -1,0 +1,26 @@
+[project]
+name = "resonance-api"
+version = "0.1.0"
+description = "Backend for Resonance Voice Lab — a playground for STT / TTS / STS providers"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "httpx>=0.27",
+  "pydantic-settings>=2.4",
+  "sqlmodel>=0.0.22",
+  "python-multipart>=0.0.9",
+  "websockets>=13",
+  "google-auth>=2.34",
+  "requests>=2.32",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "respx>=0.21"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.uv]
+package = false

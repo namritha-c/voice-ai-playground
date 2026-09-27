@@ -1,0 +1,37 @@
+{
+  "id": "azure",
+  "name": "Azure Speech",
+  "mono": "Az",
+  "env": ["AZURE_SPEECH_KEY", "AZURE_SPEECH_REGION"],
+  "modes": {
+    "tts": {
+      "tag": "Neural voices · SSML",
+      "max_chars": 5000,
+      "models": ["Neural"],
+      "voices": {"source": "static", "items": [
+        {"id": "en-IN-NeerjaNeural", "name": "Neerja", "desc": "English (India) · F"},
+        {"id": "en-IN-PrabhatNeural", "name": "Prabhat", "desc": "English (India) · M"},
+        {"id": "en-US-JennyNeural", "name": "Jenny", "desc": "English (US) · F"},
+        {"id": "en-US-GuyNeural", "name": "Guy", "desc": "English (US) · M"},
+        {"id": "hi-IN-SwaraNeural", "name": "Swara", "desc": "Hindi · F"},
+        {"id": "ml-IN-SobhanaNeural", "name": "Sobhana", "desc": "Malayalam · F"},
+        {"id": "ml-IN-MidhunNeural", "name": "Midhun", "desc": "Malayalam · M"}
+      ]},
+      "params": [
+        {"key": "style", "label": "Style", "type": "enum", "options": ["general", "cheerful", "empathetic", "sad", "excited", "newscast", "customerservice"], "default": "general"},
+        {"key": "styledegree", "label": "Style intensity", "type": "range", "min": 0.01, "max": 2, "step": 0.05, "default": 1},
+        {"key": "rate", "label": "Rate", "type": "range", "min": -50, "max": 50, "step": 1, "default": 0, "unit": "%"},
+        {"key": "pitch", "label": "Pitch", "type": "range", "min": -50, "max": 50, "step": 1, "default": 0, "unit": "%"}
+      ]
+    },
+    "stt": {
+      "tag": "Fast transcription",
+      "models": ["fast-transcription"],
+      "params": [
+        {"key": "locale", "label": "Language", "type": "enum", "options": ["en-IN", "en-US", "hi-IN", "ml-IN", "ta-IN"], "default": "en-IN", "promote": true},
+        {"key": "diarization", "label": "Speaker labels", "type": "bool", "default": false},
+        {"key": "profanity", "label": "Profanity", "type": "enum", "options": ["Masked", "Removed", "Tags", "None"], "default": "Masked"}
+      ]
+    }
+  }
+}
