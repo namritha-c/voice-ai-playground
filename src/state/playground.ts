@@ -54,14 +54,4 @@ export const actions = {
     update((s) => ({ ...s, params: { ...s.params, [k(mode, pid)]: { ...s.params[k(mode, pid)], [key]: val } } })),
   resetParams: (mode: Mode, pid: string) => update((s) => ({ ...s, params: { ...s.params, [k(mode, pid)]: {} } })),
   text: (text: string) => update((s) => ({ ...s, text })),
-  /** Restore a history run into the playground. */
-  load: (mode: Mode, pid: string, model: string, voice: { id: string; name: string } | null, params: Record<string, unknown>, text?: string | null) =>
-    update((s) => ({
-      ...s,
-      provider: { ...s.provider, [mode]: pid },
-      model: { ...s.model, [k(mode, pid)]: model },
-      voice: voice ? { ...s.voice, [k(mode, pid)]: voice } : s.voice,
-      params: { ...s.params, [k(mode, pid)]: params },
-      text: text ?? s.text,
-    })),
 };

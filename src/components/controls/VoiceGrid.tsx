@@ -31,7 +31,7 @@ export default function VoiceGrid({ voices, selected, onPick, onPreview, preview
           const sel = v.id === selected?.id, hv = hash(v.id), busy = previewing === v.id;
           return (
             <div key={v.id} style={{ position: 'relative' }}>
-              <button className={`vcard${sel ? ' on' : ''}`} aria-pressed={sel} onClick={() => onPick(v)}>
+              <button className={`vcard${sel ? ' on' : ''}`} aria-pressed={sel} title={v.desc ? `${v.name} — ${v.desc}` : v.name} onClick={() => onPick(v)}>
                 <div className="vglyph">
                   {[0, 1, 2, 3, 4].map((g) => (
                     <div key={g} className={`eq${sel || busy ? ' live' : ''}`}

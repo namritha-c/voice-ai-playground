@@ -1,5 +1,7 @@
+'use client';
+
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { api, type Mode } from '../api/client';
 import { fvs } from '../lib/anim';
 
@@ -19,7 +21,7 @@ export function Wordmark({ t, level = 0, motion = 1 }: { t: number; level?: numb
 }
 
 export default function Header({ mode, t, level }: { mode: Mode | null; t: number; level?: number }) {
-  const nav = useNavigate();
+  const router = useRouter();
   const idx = mode ? TABS.findIndex((x) => x[0] === mode) : 0;
   const health = useQuery({ queryKey: ['health'], queryFn: api.health, refetchInterval: 15000, retry: false });
   const up = health.isSuccess;
@@ -32,13 +34,13 @@ export default function Header({ mode, t, level }: { mode: Mode | null; t: numbe
       <div role="tablist" aria-label="Mode" className={`modes${mode ? '' : ' none'}`}>
         <div aria-hidden="true" className="pill" style={{ left: 4 + idx * 176 }} />
         {TABS.map(([m, label, abbr]) => (
-          <button key={m} role="tab" aria-selected={m === mode} className={`tab${m === mode ? ' on' : ''}`} onClick={() => nav(`/${m}`)}>
+          <button key={m} role="tab" aria-selected={m === mode} className={`tab${m === mode ? ' on' : ''}`} onClick={() => router.push(`/${m}`)}>
             <span>{label}</span><span className="abbr">{abbr}</span>
           </button>
         ))}
       </div>
       <div className="header-right">
-        <span className="mono api-state" title={up ? 'Backend reachable' : 'Backend not reachable — start resonance-api'}>
+        <span className="mono api-state" title={up ? 'API reachable' : 'API not reachable'}>
           <span className="dot" style={{ background: up ? 'var(--stt)' : health.isLoading ? 'var(--mute)' : 'var(--danger)' }} />
           {up ? 'API ONLINE' : health.isLoading ? 'CONNECTING' : 'API OFFLINE'}
         </span>

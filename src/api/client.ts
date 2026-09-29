@@ -51,9 +51,11 @@ export interface Word {
   speaker: string | null;
 }
 
-export interface Run {
+export interface Transcript { text: string; language: string | null; words: Word[] }
+
+/** What the server returns for a run: JSON for STT, the `X-Resonance-Meta` header for TTS and STS. Nothing is stored. */
+export interface RunMeta {
   id: string;
-  created_at: string;
   mode: Mode;
   provider: string;
   provider_name: string;
@@ -61,14 +63,17 @@ export interface Run {
   voice: string | null;
   voice_name: string | null;
   params: Record<string, unknown>;
-  input_text: string | null;
-  input_audio_url: string | null;
-  audio_url: string | null;
-  transcript: { text: string; language: string | null; words: Word[] } | null;
+  transcript: Transcript | null;
+  /** File extension of the output audio, e.g. `mp3`. Null for STT. */
+  ext: string | null;
   metric_ms: number | null;
-  status: 'ok' | 'error';
-  error: string | null;
   request_preview: string | null;
+}
+
+/** A run as the client holds it: the output audio lives in a blob URL for this tab only. */
+export interface Run extends RunMeta {
+  input_text: string | null;
+  audio_url: string | null;
 }
 
 export class ApiError extends Error {}
@@ -93,11 +98,24 @@ export interface RunConfig {
   params: Record<string, unknown>;
 }
 
+/** Must match `MAX_UPLOAD_BYTES` on the server (Vercel Functions cap bodies at 4.5 MB). */
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 function audioForm(audio: Blob, cfg: RunConfig): FormData {
+  if (audio.size > MAX_UPLOAD_BYTES) throw new ApiError('Audio is larger than 4 MB. Trim it to about 2 minutes.');
   const f = new FormData();
   f.append('audio', audio, 'audio.wav');
   f.append('config', JSON.stringify(cfg));
   return f;
+}
+
+/** Read an audio response: bytes in the body, run metadata base64-encoded in a header. */
+async function audioRun(res: Response, input_text: string | null): Promise<Run> {
+  if (!res.ok) return j<never>(res);
+  const raw = res.headers.get('X-Resonance-Meta');
+  if (!raw) throw new ApiError('response is missing run metadata');
+  const meta = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(raw), (c) => c.charCodeAt(0)))) as RunMeta;
+  return { ...meta, input_text, audio_url: URL.createObjectURL(await res.blob()) };
 }
 
 export const api = {
@@ -106,19 +124,20 @@ export const api = {
   voices: (pid: string, mode: Mode) =>
     fetch(`/api/providers/${pid}/voices?mode=${mode}`).then(j<{ source: string; voices: Voice[]; warning?: string }>),
   tts: (cfg: RunConfig & { text: string }) =>
-    fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cfg) }).then(j<Run>),
-  stt: (audio: Blob, cfg: RunConfig) => fetch('/api/stt', { method: 'POST', body: audioForm(audio, cfg) }).then(j<Run>),
-  sts: (audio: Blob, cfg: RunConfig) => fetch('/api/sts', { method: 'POST', body: audioForm(audio, cfg) }).then(j<Run>),
-  preview: (provider: string, voice: string, name: string) =>
-    fetch('/api/voices/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, voice, name }) })
-      .then(j<{ audio_url: string }>),
-  runs: (q: { mode?: string; provider?: string; status?: string; cursor?: string | null; limit?: number }) => {
-    const u = new URLSearchParams();
-    Object.entries(q).forEach(([k, v]) => { if (v) u.set(k, String(v)); });
-    return fetch(`/api/runs?${u}`).then(j<{ items: Run[]; next: string | null }>);
+    fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cfg) })
+      .then((r) => audioRun(r, cfg.text)),
+  stt: async (audio: Blob, cfg: RunConfig): Promise<Run> => {
+    const meta = await fetch('/api/stt', { method: 'POST', body: audioForm(audio, cfg) }).then(j<RunMeta>);
+    return { ...meta, input_text: null, audio_url: null };
   },
-  run: (id: string) => fetch(`/api/runs/${id}`).then(j<Run>),
-  deleteRun: (id: string) => fetch(`/api/runs/${id}`, { method: 'DELETE' }).then(j<{ ok: boolean }>),
+  sts: async (audio: Blob, cfg: RunConfig) =>
+    fetch('/api/sts', { method: 'POST', body: audioForm(audio, cfg) }).then((r) => audioRun(r, null)),
+  /** Returns a blob URL for a short sample in the voice. The GET is cached by the CDN and the browser. */
+  preview: async (provider: string, voice: string, name: string) => {
+    const r = await fetch(`/api/voices/preview?${new URLSearchParams({ provider, voice, name })}`);
+    if (!r.ok) return j<never>(r);
+    return URL.createObjectURL(await r.blob());
+  },
 };
 
 export const optValue = (o: EnumOption) => (typeof o === 'string' ? o : o.value);

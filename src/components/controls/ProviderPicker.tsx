@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import type { Mode, Provider } from '../../api/client';
 import { IconArrowUpRight, IconChevron } from '../Icons';
 
@@ -48,7 +50,7 @@ export default function ProviderPicker({ mode, providers, current, onPick }: {
             );
           })}
           <div style={{ height: 1, background: 'var(--line-2)', margin: '4px 8px' }} />
-          <Link className="pitem" to="/providers" style={{ height: 44, color: 'var(--ink-3)' }}>
+          <Link className="pitem" href="/providers" style={{ height: 44, color: 'var(--ink-3)' }}>
             <span style={{ marginLeft: 10, display: 'flex' }}><IconArrowUpRight /></span>
             <span style={{ fontSize: 13 }}>All providers</span>
           </Link>

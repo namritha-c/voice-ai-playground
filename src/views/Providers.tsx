@@ -1,9 +1,12 @@
+'use client';
+
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { api, MODES, type Mode } from '../api/client';
 import { IconSearch } from '../components/Icons';
 import { CAP_STYLE, fvs } from '../lib/anim';
+import { useClock } from '../lib/useClock';
 import { actions } from '../state/playground';
 
 const FILTERS: [Mode | 'all', string][] = [['all', 'All'], ['tts', 'Text to Speech'], ['stt', 'Speech to Text'], ['sts', 'Speech to Speech']];
@@ -26,20 +29,21 @@ export function PageTitle({ text, t }: { text: string; t: number }) {
 
 export function PageBackdrop() {
   return (
-    <svg aria-hidden="true" width="1364" height="1024" viewBox="0 0 1364 1024" style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }}>
+    <svg aria-hidden="true" width="100%" height="100%" style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none', zIndex: -1 }}>
       <defs><pattern id="pdots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#1F1D1A" /></pattern></defs>
-      <rect width="1364" height="1024" fill="url(#pdots)" />
+      <rect width="100%" height="100%" fill="url(#pdots)" />
       <g className="drift" fill="none" stroke="#1B1916" strokeWidth="1">
-        <path d="M-40 160 C 260 80, 520 240, 860 170 S 1300 90, 1420 190" />
-        <path d="M-40 210 C 280 130, 540 290, 880 220 S 1300 140, 1420 240" />
-        <path d="M-40 260 C 300 180, 560 340, 900 270 S 1300 190, 1420 290" />
+        <path d="M-40 160 C 260 80, 520 240, 860 170 S 1300 90, 1420 190 S 1700 280, 2100 160 S 2500 110, 2900 230" />
+        <path d="M-40 210 C 280 130, 540 290, 880 220 S 1300 140, 1420 240 S 1700 330, 2100 210 S 2500 160, 2900 280" />
+        <path d="M-40 260 C 300 180, 560 340, 900 270 S 1300 190, 1420 290 S 1700 380, 2100 260 S 2500 210, 2900 330" />
       </g>
     </svg>
   );
 }
 
-export default function Providers({ t }: { t: number }) {
-  const nav = useNavigate();
+export default function Providers() {
+  const router = useRouter();
+  const t = useClock(20);
   const [f, setF] = useState<Mode | 'all'>('all');
   const [q, setQ] = useState('');
   const { data = [], isError, isLoading } = useQuery({ queryKey: ['providers'], queryFn: api.providers });
@@ -49,7 +53,7 @@ export default function Providers({ t }: { t: number }) {
   const open = (pid: string, caps: Mode[]) => {
     const m = f !== 'all' && caps.includes(f) ? f : caps[0];
     actions.provider(m, pid);
-    nav(`/${m}`);
+    router.push(`/${m}`);
   };
 
   return (
@@ -83,14 +87,14 @@ export default function Providers({ t }: { t: number }) {
         })}
       </div>
 
-      {isError && <p className="empty-state">Backend offline — start resonance-api on :8000.</p>}
+      {isError && <p className="empty-state">Can’t reach the API. Reload to try again.</p>}
       {isLoading && <p className="empty-state">Loading providers…</p>}
 
       <div className="pgrid" style={{ position: 'relative' }}>
         {shown.map((p, i) => (
           <button key={p.id} className="card" style={{ animationDelay: `${(0.35 + i * 0.06).toFixed(2)}s` }} onClick={() => open(p.id, p.caps)}
             aria-label={`${p.name}, ${p.connected ? 'connected' : 'no API key set'}, supports ${p.caps.join(', ').toUpperCase()}`}
-            title={p.connected ? `Open ${p.name} in the playground` : `Add ${p.missing_env.join(', ')} to resonance-api/.env`}>
+            title={p.connected ? `Open ${p.name} in the playground` : `Set ${p.missing_env.join(', ')} in the server environment`}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
               <span className="mono-tile" style={{ width: 46, height: 46, borderRadius: 13, fontSize: 20, color: p.connected ? 'var(--tts)' : 'var(--mute)' }}>{p.mono}</span>
               <span className="mono" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 10, letterSpacing: '0.18em', color: p.connected ? 'var(--ink)' : 'var(--mute)' }}>
@@ -120,8 +124,8 @@ export default function Providers({ t }: { t: number }) {
             <span className="mono" style={{ fontSize: 10, letterSpacing: '0.22em', color: 'var(--mute)' }}>ADD IN CODE</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <span className="mono" style={{ fontSize: 12, color: 'var(--ink-3)' }}>providers/&lt;id&gt;/manifest.json</span>
-              <span className="mono" style={{ fontSize: 12, color: 'var(--ink-3)' }}>providers/&lt;id&gt;/adapter.py</span>
-              <span className="mono" style={{ fontSize: 12, color: 'var(--mute-2)' }}>.env → restart</span>
+              <span className="mono" style={{ fontSize: 12, color: 'var(--ink-3)' }}>providers/&lt;id&gt;/adapter.ts</span>
+              <span className="mono" style={{ fontSize: 12, color: 'var(--mute-2)' }}>register in registry.ts</span>
             </div>
           </div>
         )}

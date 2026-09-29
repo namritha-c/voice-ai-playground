@@ -1,6 +1,8 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { ThinkingOrb, type OrbState } from 'thinking-orbs';
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { api, appliesTo, type Mode, type ParamSpec, type Provider, type Run, type Voice } from '../api/client';
 import ParamField from '../components/controls/ParamField';
 import ProviderPicker from '../components/controls/ProviderPicker';
@@ -8,13 +10,16 @@ import VoiceGrid from '../components/controls/VoiceGrid';
 import { IconChevron, IconMic, IconPause, IconPlay, IconReset, IconStop, IconUpload, IconWave } from '../components/Icons';
 import OutputBar, { type Bar } from '../components/playground/OutputBar';
 import { Backdrop, Chain, Headline, Orb, type Energy } from '../components/playground/Hero';
-import { Decoder, clamp, fmt, rng, hash } from '../lib/anim';
+import { ACCENTS, Decoder, clamp, fmt, rng, hash } from '../lib/anim';
 import { level as liveLevel, meter, peaksFromUrl, startRecording, toWav16k, type Recorder } from '../lib/audio';
 import { now, useClock } from '../lib/useClock';
 import { actions, k, useSelection } from '../state/playground';
 import { useToast } from '../components/Toast';
 
 type Phase = 'idle' | 'recording' | 'busy' | 'ready';
+
+// What each wait looks like: composing a voice, weaving one voice into another, solving a transcript.
+const BUSY_ORB: Record<Mode, OrbState> = { tts: 'composing', sts: 'weaving', stt: 'solving' };
 interface Take { wav: Blob; duration: number; peaks: number[]; url: string; name: string }
 
 // Keep the last result per mode so switching tabs doesn't lose it.
@@ -25,9 +30,7 @@ const decoder = new Decoder();
 export default function Playground({ mode }: { mode: Mode }) {
   const t = useClock();
   const toast = useToast();
-  const qc = useQueryClient();
   const sel = useSelection();
-  const [search, setSearch] = useSearchParams();
 
   // ---------- provider / model / voice / params resolution ----------
   const providersQ = useQuery({ queryKey: ['providers'], queryFn: api.providers });
@@ -81,12 +84,14 @@ export default function Playground({ mode }: { mode: Mode }) {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const setResult = useCallback((r: Run) => {
+    // The old output only lives in a blob URL; free it once nothing can play it.
+    const old = lastRun[mode]?.audio_url;
+    if (old && old !== r.audio_url) URL.revokeObjectURL(old);
     lastRun[mode] = r;
     setRun(r);
     setResultAt(now());
     setPhase('ready');
-    qc.invalidateQueries({ queryKey: ['runs'] });
-  }, [mode, qc]);
+  }, [mode]);
 
   // stop everything on unmount
   useEffect(() => () => {
@@ -94,21 +99,6 @@ export default function Playground({ mode }: { mode: Mode }) {
     previewAudio.current?.pause();
     inputAudio.current?.pause();
   }, []);
-
-  // restore a run from history: /tts?run=<id>
-  useEffect(() => {
-    const id = search.get('run');
-    if (!id) return;
-    api.run(id).then((r) => {
-      actions.load(r.mode, r.provider, r.model, r.voice ? { id: r.voice, name: r.voice_name ?? r.voice } : null, r.params, r.input_text);
-      if (r.status === 'ok') setResult(r);
-      if (r.input_audio_url && r.mode !== 'tts') {
-        fetch(r.input_audio_url).then((res) => res.blob()).then((b) => adoptTake(b, 'input.wav')).catch(() => undefined);
-      }
-    }).catch((e) => toast.error(String(e.message ?? e)));
-    search.delete('run');
-    setSearch(search, { replace: true });
-  }, [search, setSearch, setResult, toast]);
 
   // waveform peaks for the output audio
   useEffect(() => {
@@ -132,7 +122,7 @@ export default function Playground({ mode }: { mode: Mode }) {
 
   const ensureReady = (): boolean => {
     if (!provider || !spec) return false;
-    if (!provider.connected) { toast.error(`${provider.name} has no API key. Add ${provider.missing_env.join(', ')} to resonance-api/.env and restart.`); return false; }
+    if (!provider.connected) { toast.error(`${provider.name} has no API key. Add ${provider.missing_env.join(', ')} to the server environment (.env.local, or the Vercel project settings) and redeploy.`); return false; }
     if (spec.voices && !voice) { toast.error('Pick a voice first.'); return false; }
     return true;
   };
@@ -268,7 +258,7 @@ export default function Playground({ mode }: { mode: Mode }) {
     setPreviewing(v.id);
     actions.voice(mode, provider!.id, { id: v.id, name: v.name });
     try {
-      const url = v.preview_url ?? (await api.preview(provider!.id, v.id, v.name)).audio_url;
+      const url = v.preview_url ?? (await api.preview(provider!.id, v.id, v.name));
       const el = new Audio(url);
       previewAudio.current = el;
       el.onended = el.onerror = () => setPreviewing((p) => (p === v.id ? null : p));
@@ -287,7 +277,7 @@ export default function Playground({ mode }: { mode: Mode }) {
       a.download = `${run.provider}-${run.model}-${run.id}.txt`;
     } else if (run.audio_url) {
       a.href = run.audio_url;
-      a.download = `${run.provider}-${run.voice_name ?? run.voice ?? 'audio'}-${run.id}.${run.audio_url.split('.').pop()}`;
+      a.download = `${run.provider}-${run.voice_name ?? run.voice ?? 'audio'}-${run.id}.${run.ext ?? 'audio'}`;
     }
     a.click();
   };
@@ -407,9 +397,9 @@ export default function Playground({ mode }: { mode: Mode }) {
     return (
       <div className="stage"><main className="main"><Backdrop />
         <div style={{ position: 'relative', marginTop: 80 }}>
-          <h1 className="hl">Backend<br /><span style={{ fontStyle: 'italic', color: 'var(--accent)' }}>offline.</span></h1>
-          <p className="mono" style={{ color: 'var(--mute)', marginTop: 32, fontSize: 12.5, letterSpacing: '0.04em' }}>
-            Start resonance-api on :8000 — <span style={{ color: 'var(--ink-3)' }}>uv run uvicorn app.main:app --reload</span>
+          <h1 className="hl">API<br /><span style={{ fontStyle: 'italic', color: 'var(--accent)' }}>unreachable.</span></h1>
+          <p className="mono" style={{ color: 'var(--mute)', marginTop: 32, fontSize: 13, letterSpacing: '0.03em' }}>
+            Can’t reach /api/providers — <span style={{ color: 'var(--ink-3)' }}>{(providersQ.error as Error)?.message}</span>
           </p>
         </div>
       </main></div>
@@ -457,10 +447,15 @@ export default function Playground({ mode }: { mode: Mode }) {
               ) : phase === 'ready' && run?.transcript ? (
                 <p className="transcript empty">No speech detected.</p>
               ) : (
-                <p className="transcript empty">
-                  {phase === 'recording' ? <>Listening… press stop when you're done.<span className="caret blink" /></>
-                    : phase === 'busy' ? `Sending to ${provider?.name}…` : 'Tap record and start speaking — or drop an audio file.'}
-                </p>
+                <div className="stt-wait">
+                  {(phase === 'recording' || phase === 'busy') && (
+                    <ThinkingOrb state={phase === 'recording' ? 'listening' : BUSY_ORB.stt} size={64} theme="dark" color={ACCENTS.stt} />
+                  )}
+                  <p className="transcript empty">
+                    {phase === 'recording' ? <>Listening… press stop when you're done.<span className="caret blink" /></>
+                      : phase === 'busy' ? `Sending to ${provider?.name}…` : 'Tap record and start speaking — or drop an audio file.'}
+                  </p>
+                </div>
               )}
             </div>
             <div className="mono foot">
@@ -494,7 +489,7 @@ export default function Playground({ mode }: { mode: Mode }) {
                       void inputAudio.current.play();
                     }}><IconPlay size={13} /></button>
                   )}
-                  <span className="mono" style={{ fontSize: 11.5, letterSpacing: '0.04em', color: 'var(--mute)', marginLeft: 4 }}>
+                  <span className="mono" style={{ fontSize: 12, letterSpacing: '0.03em', color: 'var(--mute)', marginLeft: 4 }}>
                     {srcRec ? `Recording… ${fmt(now() - recAt)}` : take ? `[${take.name}] · ${fmt(take.duration)}` : 'Record or drop a source take'}
                   </span>
                 </div>
@@ -504,8 +499,8 @@ export default function Playground({ mode }: { mode: Mode }) {
                 <path d="M44 6l8 6-8 6" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <div style={{ width: 200, flexShrink: 0 }}>
-                <div className="serif ellipsis" style={{ fontSize: 46, fontStyle: 'italic', letterSpacing: '-0.03em', color: 'var(--accent)', lineHeight: 1.05 }}>{voice?.name ?? '—'}</div>
-                <div className="mono ellipsis" style={{ fontSize: 10.5, letterSpacing: '0.04em', color: 'var(--mute)' }}>{voice?.id ?? ''}</div>
+                <div className="serif ellipsis" style={{ fontSize: 36, fontStyle: 'italic', letterSpacing: '-0.03em', color: 'var(--accent)', lineHeight: 1.05 }}>{voice?.name ?? '—'}</div>
+                <div className="mono ellipsis" style={{ fontSize: 11.5, letterSpacing: '0.03em', color: 'var(--mute)' }}>{voice?.id ?? ''}</div>
               </div>
             </div>
           )}
@@ -514,8 +509,8 @@ export default function Playground({ mode }: { mode: Mode }) {
 
         <OutputBar
           playIcon={mode === 'stt'
-            ? (phase === 'recording' ? <IconStop /> : phase === 'busy' ? <span className="spinner" /> : <IconMic size={22} />)
-            : phase === 'busy' ? <span className="spinner" /> : playing ? <IconPause /> : <IconPlay />}
+            ? (phase === 'recording' ? <IconStop /> : phase === 'busy' ? <ThinkingOrb state={BUSY_ORB[mode]} size={20} theme="light" /> : <IconMic size={22} />)
+            : phase === 'busy' ? <ThinkingOrb state={BUSY_ORB[mode]} size={20} theme="light" /> : playing ? <IconPause /> : <IconPlay />}
           playLabel={mode === 'stt' ? (phase === 'recording' ? 'Stop recording' : 'Start recording') : playing ? 'Pause' : 'Play'}
           onPlay={onPlay}
           playDisabled={phase === 'busy'}
@@ -584,8 +579,7 @@ export default function Playground({ mode }: { mode: Mode }) {
 
         <button className={`gen${phase === 'busy' || live ? ' busy' : ''}`} onClick={primary}
           disabled={!provider || phase === 'busy' || srcRec || (mode === 'sts' && !take)}>
-          <span className="shine" aria-hidden="true" />
-          {phase === 'busy' ? <span className="spinner" /> : <IconWave size={18} />}
+          {phase === 'busy' ? <ThinkingOrb state={BUSY_ORB[mode]} size={20} theme="light" /> : <IconWave size={18} />}
           <span>{genLabel}</span>
         </button>
       </aside>
