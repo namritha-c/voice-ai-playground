@@ -1,29 +1,22 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Mode, Provider } from '../../api/client';
 import { IconArrowUpRight, IconChevron } from '../Icons';
+import Menu from './Menu';
 
 export default function ProviderPicker({ mode, providers, current, onPick }: {
   mode: Mode; providers: Provider[]; current: Provider | undefined; onPick: (p: Provider) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', esc);
-    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', esc); };
-  }, [open]);
+  const btn = useRef<HTMLButtonElement>(null);
   const tag = (p: Provider) => p.modes[mode]?.tag ?? '';
 
   return (
-    <div ref={ref} className="field" style={{ position: 'relative', zIndex: 5 }}>
+    <div className="field">
       <span className="lbl">Provider</span>
-      <button aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(!open)} className={`prov-btn${open ? ' open' : ''}`}>
+      <button ref={btn} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(!open)} className={`prov-btn${open ? ' open' : ''}`}>
         <div className="mono-tile" style={{ width: 44, height: 44, fontSize: 19, color: 'var(--accent)' }}>{current?.mono ?? '··'}</div>
         <div style={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span className="serif ellipsis" style={{ fontSize: 22, lineHeight: 1, letterSpacing: '-0.015em', fontVariationSettings: "'opsz' 36, 'wght' 420" }}>{current?.name ?? 'Loading…'}</span>
@@ -33,8 +26,8 @@ export default function ProviderPicker({ mode, providers, current, onPick }: {
         </div>
         <span style={{ color: 'var(--ink-3)', transform: `rotate(${open ? 180 : 0}deg)`, transition: 'transform .3s', display: 'flex' }}><IconChevron /></span>
       </button>
-      {open && (
-        <div className="pop menu prov-pop" role="listbox" aria-label="Providers">
+      <Menu anchor={btn} open={open} onClose={() => setOpen(false)} role="listbox" maxHeight={420}>
+        <div className="menu-stack">
           {providers.map((p) => {
             const sel = p.id === current?.id;
             return (
@@ -55,7 +48,7 @@ export default function ProviderPicker({ mode, providers, current, onPick }: {
             <span style={{ fontSize: 13 }}>All providers</span>
           </Link>
         </div>
-      )}
+      </Menu>
     </div>
   );
 }

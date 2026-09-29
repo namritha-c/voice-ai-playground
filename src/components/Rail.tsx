@@ -4,22 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IconCompare, IconPlug, IconSliders, IconWave } from './Icons';
 
-export function Logo() {
-  return (
-    <svg width="40" height="40" viewBox="-20 -20 40 40" aria-hidden="true" style={{ overflow: 'visible' }}>
-      <circle className="ping" r="8" fill="none" stroke="var(--accent)" strokeWidth="1.5" />
-      <circle className="ping d2" r="8" fill="none" stroke="var(--accent)" strokeWidth="1.5" />
-      <circle r="4" fill="var(--accent)" />
-    </svg>
-  );
-}
-
 export default function Rail() {
   const path = usePathname();
   const inPlayground = /^\/(tts|stt|sts)/.test(path);
   return (
     <nav className="rail" aria-label="Primary">
-      <div className="rail-logo"><Logo /></div>
       <Link href="/tts" className={`rail-btn${inPlayground ? ' on' : ''}`} aria-label="Playground" data-tip="PLAYGROUND"><IconWave /></Link>
       <button className="rail-btn" aria-label="Compare providers (coming soon)" data-tip="COMPARE · SOON" disabled><IconCompare /></button>
       <Link href="/providers" className={`rail-btn${path === '/providers' ? ' on' : ''}`} aria-label="Providers" data-tip="PROVIDERS"><IconPlug /></Link>

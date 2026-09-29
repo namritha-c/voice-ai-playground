@@ -89,7 +89,7 @@ export function Orb({ t, energy, progress, level, phaseLabel, title, sub, accent
         <g className="spin fast" opacity={busy ? 1 : 0}><circle r="168" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeDasharray="90 966" /></g>
         <circle r="118" fill="url(#orbcore)" />
       </svg>
-      <OrbCore accent={accent} energy={energy} />
+      <OrbCore energy={energy} />
       <OrbGL signal={signal} color={accent} />
       <div className="breathe" aria-hidden="true">{bars}</div>
       <div role="status" aria-live="polite" className="orb-center">
@@ -109,17 +109,6 @@ export function Backdrop() {
     <svg aria-hidden="true" width="100%" height="100%" className="backdrop">
       <defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#26231F" /></pattern></defs>
       <rect width="100%" height="100%" fill="url(#dots)" />
-      <g className="drift" fill="none" stroke="#1E1C19" strokeWidth="1">
-        <path d="M-40 120 C 200 60, 420 200, 700 140 S 1100 60, 1180 160 S 1500 260, 1900 140 S 2400 70, 2800 200" />
-        <path d="M-40 170 C 220 110, 440 250, 720 190 S 1100 110, 1180 210 S 1500 310, 1900 190 S 2400 120, 2800 250" />
-        <path d="M-40 220 C 240 160, 460 300, 740 240 S 1100 160, 1180 260 S 1500 360, 1900 240 S 2400 170, 2800 300" />
-        <path d="M-40 270 C 260 210, 480 350, 760 290 S 1100 210, 1180 310 S 1500 410, 1900 290 S 2400 220, 2800 350" />
-      </g>
-      <g className="drift d2" fill="none" stroke="#1B1916" strokeWidth="1">
-        <path d="M-40 620 C 180 700, 460 560, 720 640 S 1060 720, 1180 620 S 1500 720, 1900 600 S 2400 530, 2800 660" />
-        <path d="M-40 670 C 200 750, 480 610, 740 690 S 1060 770, 1180 670 S 1500 770, 1900 650 S 2400 580, 2800 710" />
-        <path d="M-40 720 C 220 800, 500 660, 760 740 S 1060 820, 1180 720 S 1500 820, 1900 700 S 2400 630, 2800 760" />
-      </g>
     </svg>
   );
 }

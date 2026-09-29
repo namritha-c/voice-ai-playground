@@ -34,11 +34,6 @@ export function PageBackdrop() {
     <svg aria-hidden="true" width="100%" height="100%" style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none', zIndex: -1 }}>
       <defs><pattern id="pdots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#1F1D1A" /></pattern></defs>
       <rect width="100%" height="100%" fill="url(#pdots)" />
-      <g className="drift" fill="none" stroke="#1B1916" strokeWidth="1">
-        <path d="M-40 160 C 260 80, 520 240, 860 170 S 1300 90, 1420 190 S 1700 280, 2100 160 S 2500 110, 2900 230" />
-        <path d="M-40 210 C 280 130, 540 290, 880 220 S 1300 140, 1420 240 S 1700 330, 2100 210 S 2500 160, 2900 280" />
-        <path d="M-40 260 C 300 180, 560 340, 900 270 S 1300 190, 1420 290 S 1700 380, 2100 260 S 2500 210, 2900 330" />
-      </g>
     </svg>
   );
 }

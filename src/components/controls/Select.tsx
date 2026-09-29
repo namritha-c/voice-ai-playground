@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { IconCheck, IconChevron } from '../Icons';
+import Menu from './Menu';
 
 /**
  * A glass replacement for the browser's native <select>, following the ARIA "select-only combobox" pattern:
@@ -12,18 +13,11 @@ export default function Select({ id, value, options, onChange }: {
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const root = useRef<HTMLDivElement>(null);
+  const btn = useRef<HTMLButtonElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const typed = useRef({ text: '', at: 0 });
   const listId = useId();
   const selected = Math.max(0, options.indexOf(value));
-
-  useEffect(() => {
-    if (!open) return;
-    const away = (e: MouseEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener('mousedown', away);
-    return () => document.removeEventListener('mousedown', away);
-  }, [open]);
 
   // keep the highlighted option in view when the list scrolls
   useEffect(() => {
@@ -55,15 +49,15 @@ export default function Select({ id, value, options, onChange }: {
   };
 
   return (
-    <div ref={root} className="select">
-      <button id={id} type="button" role="combobox" className="select-btn" aria-haspopup="listbox" aria-expanded={open}
+    <div className="select">
+      <button ref={btn} id={id} type="button" role="combobox" className="select-btn" aria-haspopup="listbox" aria-expanded={open}
         aria-controls={listId} aria-activedescendant={open ? `${listId}-${active}` : undefined}
         onClick={() => (open ? setOpen(false) : show())} onKeyDown={onKey}>
         <span className="ellipsis">{value}</span>
         <span className="select-chev" style={{ transform: `rotate(${open ? 180 : 0}deg)` }}><IconChevron size={14} /></span>
       </button>
-      {open && (
-        <div ref={list} id={listId} role="listbox" className="menu pop">
+      <Menu anchor={btn} open={open} onClose={() => setOpen(false)} id={listId} role="listbox">
+        <div ref={list} className="menu-scroll">
           {options.map((o, i) => (
             <div key={o} id={`${listId}-${i}`} data-i={i} role="option" aria-selected={o === value}
               className={`menu-opt${i === active ? ' active' : ''}${o === value ? ' on' : ''}`}
@@ -73,7 +67,7 @@ export default function Select({ id, value, options, onChange }: {
             </div>
           ))}
         </div>
-      )}
+      </Menu>
     </div>
   );
 }

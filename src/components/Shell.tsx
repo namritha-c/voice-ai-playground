@@ -44,7 +44,7 @@ function Chrome({ children }: { children: ReactNode }) {
   useEffect(() => startGlass(), []);
   return (
     <div className={`app mode-${mode ?? 'tts'}`}>
-      <Aurora mode={mode} />
+      <Aurora />
       <Rail />
       <div className="col">
         <Header mode={mode} t={t} level={mode ? level() : 0} />

@@ -37,9 +37,9 @@
   --blur: blur(22px) saturate(1.5);
   color-scheme: dark;
 }
-.mode-tts { --accent: var(--tts); --accent-ring: rgba(255, 106, 43, 0.14); --accent-glow: rgba(255, 106, 43, .42); }
-.mode-stt { --accent: var(--stt); --accent-ring: rgba(166, 227, 90, 0.14); --accent-glow: rgba(166, 227, 90, .36); }
-.mode-sts { --accent: var(--sts); --accent-ring: rgba(185, 162, 255, 0.14); --accent-glow: rgba(185, 162, 255, .4); }
+.mode-tts { --accent: var(--tts); --accent-ring: rgba(255, 106, 43, 0.14); --accent-glow: rgba(255, 106, 43, .42); --tint-a: #ff5a1f; --tint-b: #ffa25e; }
+.mode-stt { --accent: var(--stt); --accent-ring: rgba(166, 227, 90, 0.14); --accent-glow: rgba(166, 227, 90, .36); --tint-a: #8fd63a; --tint-b: #2fd08a; }
+.mode-sts { --accent: var(--sts); --accent-ring: rgba(185, 162, 255, 0.14); --accent-glow: rgba(185, 162, 255, .4); --tint-a: #a58bff; --tint-b: #6a7bff; }
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
@@ -68,6 +68,12 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
   /* steady accent wash, so the page keeps its colour while the shader drifts through its dark passages */
   background: radial-gradient(70% 55% at 78% 8%, var(--accent-glow), transparent 70%), radial-gradient(60% 50% at 8% 100%, var(--accent-ring), transparent 70%);
 }
+.aurora-tint { position: absolute; inset: 0; background-color: var(--tint-a); mix-blend-mode: color; transition: background-color 1s ease; }
+.aurora-tint.b {
+  background-color: var(--tint-b); mix-blend-mode: color; opacity: .85;
+  -webkit-mask-image: radial-gradient(60% 65% at 24% 72%, #000, transparent 72%); mask-image: radial-gradient(60% 65% at 24% 72%, #000, transparent 72%);
+}
+.aurora-glow { position: absolute; inset: 0; opacity: 0; mix-blend-mode: screen; transition: opacity .14s linear; background: radial-gradient(55% 50% at 50% 38%, var(--accent-glow), transparent 72%); }
 .aurora::before {
   content: ''; position: absolute; inset: 0; z-index: 1; opacity: .09; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
@@ -82,9 +88,8 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
 .app { height: 100vh; min-width: 1180px; display: flex; background: var(--bg); color: var(--ink); position: relative; overflow: hidden; }
 .rail {
   width: 76px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 16px 0 20px; border-right: 1px solid var(--glass-line); background: rgba(10, 9, 8, .55); backdrop-filter: var(--blur); position: relative;
+  padding: 14px 0 20px; border-right: 1px solid var(--glass-line); background: rgba(10, 9, 8, .55); backdrop-filter: var(--blur); position: relative;
 }
-.rail-logo { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
 .rail-btn {
   width: 44px; height: 44px; border-radius: 12px; border: 0; background: transparent; color: var(--mute);
   display: flex; align-items: center; justify-content: center; transition: background .2s, color .2s; position: relative;
@@ -117,7 +122,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
 .api-state .dot { width: 7px; height: 7px; border-radius: 50%; }
 
 .modes { position: relative; display: flex; padding: 4px; background: var(--glass-2); border: 1px solid var(--glass-line); border-radius: 999px; box-shadow: var(--glass-hi); backdrop-filter: var(--blur); }
-.modes .pill { position: absolute; top: 4px; width: 176px; height: 40px; border-radius: 999px; background: var(--ink); box-shadow: 0 0 34px -4px var(--accent-glow), 0 4px 14px rgba(0, 0, 0, .35); transition: left .6s cubic-bezier(.7, 0, .2, 1), box-shadow .8s; }
+.modes .pill { position: absolute; top: 4px; left: 4px; width: 176px; height: 40px; border-radius: 999px; background: var(--ink); box-shadow: 0 0 34px -4px var(--accent-glow), 0 4px 14px rgba(0, 0, 0, .35); transition: transform .6s cubic-bezier(.7, 0, .2, 1), box-shadow .8s; will-change: transform; }
 .modes.none .pill { opacity: 0; }
 .tab {
   position: relative; width: 176px; height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -233,8 +238,11 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
 .orb-core {
   pointer-events: none; border-radius: 50%; overflow: hidden; left: 70px; top: 70px; width: 260px; height: 260px;
   -webkit-mask-image: radial-gradient(circle, #000 38%, transparent 71%); mask-image: radial-gradient(circle, #000 38%, transparent 71%);
-  opacity: .82; animation: coreIn 1.4s var(--ease) both;
+  isolation: isolate; opacity: .42; animation: coreIn 1.4s var(--ease) both; transition: opacity .5s, scale .6s var(--ease);
 }
+.orb-core::after { content: ''; position: absolute; inset: 0; background: var(--accent); mix-blend-mode: color; }
+.orb-core[data-energy='busy'] { opacity: .6; scale: 1.04; }
+.orb-core[data-energy='live'] { opacity: .78; scale: 1.1; }
 .orb::before {
   content: ''; position: absolute; left: -40px; top: -40px; width: 480px; height: 480px; border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle, var(--accent-glow), transparent 62%); opacity: .38; filter: blur(30px);
@@ -411,12 +419,8 @@ button.card:hover, a.card:hover, .card.link:hover, .card.link:focus-within { bor
 .breathe { transform-box: view-box; transform-origin: center; animation: breathe 6s ease-in-out infinite; }
 .flow { stroke-dasharray: 2 6; animation: flow 1.6s linear infinite; }
 .flow.fast { animation-duration: .35s; }
-.ping { transform-box: fill-box; transform-origin: center; animation: ping 2.6s ease-out infinite; }
-.ping.d2 { animation-delay: 1.3s; }
 .node { animation: node 2.4s ease-in-out infinite; }
 .blink { animation: blink 1.1s steps(2, start) infinite; }
-.drift { animation: drift 26s ease-in-out infinite alternate; }
-.drift.d2 { animation-duration: 34s; animation-direction: alternate-reverse; }
 .pop { animation: pop .22s cubic-bezier(.2, .7, .2, 1) both; }
 .fade { animation: rise .6s var(--ease) both; }
 
@@ -424,14 +428,12 @@ button.card:hover, a.card:hover, .card.link:hover, .card.link:focus-within { bor
 @keyframes wmIn { 0% { transform: translateY(.4em); opacity: 0; filter: blur(5px); } 100% { transform: none; opacity: 1; filter: blur(0); } }
 @keyframes wordIn { 0% { opacity: 0; transform: translateY(.4em); filter: blur(8px); font-variation-settings: 'opsz' 36, 'wght' 720; } 100% { opacity: 1; transform: none; filter: blur(0); font-variation-settings: 'opsz' 36, 'wght' 330; } }
 @keyframes auroraIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes coreIn { 0% { opacity: 0; transform: scale(.85); } 100% { opacity: .82; transform: none; } }
+@keyframes coreIn { 0% { opacity: 0; transform: scale(.85); } 100% { opacity: .42; transform: none; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
 @keyframes flow { to { stroke-dashoffset: -16; } }
-@keyframes ping { 0% { transform: scale(.45); opacity: .9; } 100% { transform: scale(2.2); opacity: 0; } }
 @keyframes node { 0%, 100% { box-shadow: 0 0 0 0 rgba(242, 237, 228, 0); } 50% { box-shadow: 0 0 0 5px rgba(242, 237, 228, .08); } }
 @keyframes blink { to { visibility: hidden; } }
-@keyframes drift { 0% { transform: translate(0, 0); } 100% { transform: translate(-60px, 24px); } }
 @keyframes eq { 0% { transform: scaleY(.35); } 100% { transform: scaleY(1); } }
 @keyframes rise { 0% { opacity: 0; transform: translateY(10px); filter: blur(4px); } 100% { opacity: 1; transform: none; filter: none; } }
 @keyframes pop { 0% { opacity: 0; transform: translateY(-6px) scale(.98); } 100% { opacity: 1; transform: none; } }
@@ -439,7 +441,7 @@ button.card:hover, a.card:hover, .card.link:hover, .card.link:focus-within { bor
 
 @media (prefers-reduced-motion: reduce) {
   .ch, .wm, .wd, .fade, .pop, .card, .sheet[open], .aurora, .orb-core { animation: none; }
-  .spin, .breathe, .drift, .flow, .ping, .node, .eq.live { animation: none; }
+  .spin, .breathe, .flow, .node, .eq.live { animation: none; }
 }
 @media (max-width: 1360px) {
   .hero .orb { transform: scale(.82); margin: 0 -36px; }

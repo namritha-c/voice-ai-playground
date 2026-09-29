@@ -35,7 +35,7 @@ export default function Header({ mode, t, level }: { mode: Mode | null; t: numbe
         <span className="mono lab">LAB</span>
       </div>
       <div role="tablist" aria-label="Mode" className={`modes${mode ? '' : ' none'}`}>
-        <div aria-hidden="true" className="pill" style={{ left: 4 + idx * 176 }} />
+        <div aria-hidden="true" className="pill" style={{ transform: `translateX(${idx * 176}px)` }} />
         {TABS.map(([m, label, abbr]) => (
           <button key={m} role="tab" aria-selected={m === mode} className={`tab${m === mode ? ' on' : ''}`} onClick={() => router.push(`/${m}`)}>
             <span>{label}</span><span className="abbr">{abbr}</span>
