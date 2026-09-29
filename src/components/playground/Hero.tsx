@@ -1,29 +1,18 @@
-import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
 import type { Mode } from '../../api/client';
-import { clamp, fvs, headlineWeights } from '../../lib/anim';
+import { ACCENTS, clamp, fvs } from '../../lib/anim';
 import { spectrum } from '../../lib/audio';
-import type { OrbSignal } from './OrbGL';
-import OrbCore from './OrbCore';
-
-// three.js is only needed on the playground; load it on demand, in the browser.
-const OrbGL = dynamic(() => import('./OrbGL'), { ssr: false });
+import LiquidWord from '../LiquidWord';
+import { OrbSlot } from './OrbHost';
 
 const HEADLINES: Record<Mode, [string, string]> = { tts: ['Give words', 'a voice.'], stt: ['Hear every', 'word.'], sts: ['Speak in', 'any voice.'] };
 
 export type Energy = 'idle' | 'busy' | 'live';
 
-export function Headline({ mode, t, energy }: { mode: Mode; t: number; energy: Energy }) {
-  const lines = headlineWeights(HEADLINES[mode], t, energy === 'live' ? 1 : energy === 'busy' ? 0.5 : 0);
+export function Headline({ mode }: { mode: Mode }) {
+  const [top, bottom] = HEADLINES[mode];
   return (
-    <h1 className="hl" aria-label={HEADLINES[mode].join(' ')}>
-      {lines.map((chars, li) => (
-        <span key={li} className="hl-line" aria-hidden="true" style={{ fontStyle: li === 1 ? 'italic' : 'normal', color: li === 1 ? 'var(--accent)' : 'var(--ink)' }}>
-          {chars.map((c) => (
-            <span key={c.k} className="ch" style={{ animationDelay: `${(0.08 + c.k * 0.032).toFixed(3)}s`, fontVariationSettings: c.fvs }}>{c.c === ' ' ? ' ' : c.c}</span>
-          ))}
-        </span>
-      ))}
+    <h1 className="hl">
+      <LiquidWord text={[{ text: top }, { text: bottom, italic: true }]} tint={ACCENTS[mode]} height={152} />
     </h1>
   );
 }
@@ -44,11 +33,12 @@ export function Chain({ rows, live, done }: { rows: string[]; live: boolean; don
   );
 }
 
-export function Orb({ t, energy, progress, level, phaseLabel, title, sub, accent, motion = 1 }: {
-  t: number; energy: Energy; progress: number; level: number; phaseLabel: string; title: string; sub: string; accent: string; motion?: number;
+/** Ring bars have a fixed height and are scaled, so redrawing them each frame never needs layout. */
+const BAR = 40;
+
+export function Orb({ t, energy, progress, level, phaseLabel, title, sub, motion = 1 }: {
+  t: number; energy: Energy; progress: number; level: number; phaseLabel: string; title: string; sub: string; motion?: number;
 }) {
-  const signal = useRef<OrbSignal>({ energy, level });
-  useEffect(() => { signal.current = { energy, level }; });
   const busy = energy === 'busy', active = energy === 'live';
   const spec = active ? spectrum() : null;
   const N = 90;
@@ -71,7 +61,7 @@ export function Orb({ t, energy, progress, level, phaseLabel, title, sub, accent
     }
     h = Math.max(2, h * motion);
     sum += h;
-    bars.push(<div key={i} className="ob" style={{ height: h.toFixed(1) + 'px', transform: `rotate(${((a * 180) / Math.PI).toFixed(2)}deg) translateY(-122px)`, opacity: (0.25 + 0.75 * Math.min(1, h / 46)).toFixed(2) }} />);
+    bars.push(<div key={i} className="ob" style={{ height: BAR, transform: `rotate(${((a * 180) / Math.PI).toFixed(2)}deg) translateY(-122px) scaleY(${(h / BAR).toFixed(3)})`, opacity: (0.25 + 0.75 * Math.min(1, h / 46)).toFixed(2) }} />);
   }
   const lvl = clamp((sum / N - 5) / 18, 0, 1);
   return (
@@ -89,15 +79,16 @@ export function Orb({ t, energy, progress, level, phaseLabel, title, sub, accent
         <g className="spin fast" opacity={busy ? 1 : 0}><circle r="168" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeDasharray="90 966" /></g>
         <circle r="118" fill="url(#orbcore)" />
       </svg>
-      <OrbCore energy={energy} />
-      <OrbGL signal={signal} color={accent} />
+      <OrbSlot energy={energy} level={level} />
       <div className="breathe" aria-hidden="true">{bars}</div>
       <div role="status" aria-live="polite" className="orb-center">
         <div className="mono orb-phase">
           <span className={busy || active ? 'blink' : ''} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} />
           <span>{phaseLabel}</span>
         </div>
-        <div className="serif orb-title ellipsis" style={{ fontVariationSettings: fvs(360 + 380 * lvl, 72, 100, 1) }}>{title}</div>
+        <div className="orb-title">
+          <div className="serif ellipsis orb-title-plain" style={{ fontVariationSettings: fvs(360 + 380 * lvl, 72, 100, 1) }}>{title}</div>
+        </div>
         <div className="mono orb-sub">{sub}</div>
       </div>
     </div>

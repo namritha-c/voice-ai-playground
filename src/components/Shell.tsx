@@ -5,10 +5,10 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { Mode } from '../api/client';
-import { level } from '../lib/audio';
+import { ACCENTS } from '../lib/anim';
 import { startGlass } from '../lib/glass';
-import { useClock } from '../lib/useClock';
 import Header from './Header';
+import { NoWebGL, OrbHost } from './playground/OrbHost';
 import { KeySheetProvider } from './KeySheet';
 import Rail from './Rail';
 import { ToastProvider } from './Toast';
@@ -39,15 +39,15 @@ export default function Shell({ children }: { children: ReactNode }) {
 
 function Chrome({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const t = useClock(20);
   const mode = (path.match(/^\/(tts|stt|sts)/)?.[1] as Mode | undefined) ?? null;
   useEffect(() => startGlass(), []);
   return (
     <div className={`app mode-${mode ?? 'tts'}`}>
-      <Aurora />
+      <NoWebGL><Aurora /></NoWebGL>
+      <OrbHost accent={ACCENTS[mode ?? 'tts']} />
       <Rail />
       <div className="col">
-        <Header mode={mode} t={t} level={mode ? level() : 0} />
+        <Header mode={mode} />
         {children}
       </div>
     </div>

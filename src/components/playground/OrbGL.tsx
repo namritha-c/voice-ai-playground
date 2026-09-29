@@ -107,7 +107,7 @@ function Dots({ signal, color }: { signal: RefObject<OrbSignal>; color: string }
 }
 
 /** The hero orb's 3D core: a sphere of dots that swells with the audio level and scans while a request runs. */
-export default function OrbGL({ signal, color }: { signal: RefObject<OrbSignal>; color: string }) {
+export default function OrbGL({ signal, color, paused }: { signal: RefObject<OrbSignal>; color: string; paused: boolean }) {
   const [still, setStill] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -117,7 +117,7 @@ export default function OrbGL({ signal, color }: { signal: RefObject<OrbSignal>;
     return () => mq.removeEventListener('change', sync);
   }, []);
   return (
-    <Canvas className="orb-gl" aria-hidden="true" dpr={[1, 2]} frameloop={still ? 'demand' : 'always'}
+    <Canvas className="orb-gl" aria-hidden="true" dpr={[1, 2]} frameloop={paused ? 'never' : still ? 'demand' : 'always'}
       camera={{ position: [0, 0, CAM_Z], fov: 35 }} gl={{ alpha: true, antialias: false, powerPreference: 'low-power' }}>
       <Dots signal={signal} color={color} />
     </Canvas>

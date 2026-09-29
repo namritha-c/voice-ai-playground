@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 /**
  * A dropdown panel that hangs under `anchor`. It renders at the top of the page, not inside the control,
  * so its glass blur sees the real background instead of only the side panel it would otherwise sit in.
+ * It mounts in `.app`, not `body`, so it picks up the current `mode-*` accent.
  * It closes on an outside click, Escape, resize or scroll.
  */
 export default function Menu({ anchor, open, onClose, id, role, children, maxHeight = 320 }: {
@@ -48,6 +49,6 @@ export default function Menu({ anchor, open, onClose, id, role, children, maxHei
       style={{ position: 'fixed', left: box.left, width: box.width, maxHeight, ...(box.flip ? { bottom: window.innerHeight - box.top } : { top: box.top }) }}>
       {children}
     </div>,
-    document.body,
+    anchor.current?.closest('.app') ?? document.body,
   );
 }

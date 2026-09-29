@@ -47,22 +47,6 @@ export function blobPath(r0: number, amp: number, t: number, k: number, n: numbe
   return d + 'Z';
 }
 
-/** Per-character variable-font weights for the animated headline. energy: 0 idle, .5 busy, 1 live */
-export function headlineWeights(lines: string[], t: number, energy: number, motion = 1) {
-  let g = 0;
-  return lines.map((text, li) => {
-    const italic = li === 1;
-    return text.split('').map((c) => {
-      const k = g++;
-      let w: number;
-      if (energy > 0.8) w = (italic ? 340 : 300) + 420 * motion * Math.max(0, Math.sin(t * 7 - k * 0.55));
-      else if (energy > 0.3) w = (italic ? 340 : 300) + 260 * motion * Math.exp(-Math.pow(((t * 9) % 26) - k, 2) / 4);
-      else w = (italic ? 340 : 300) + 50 * motion * Math.sin(t * 1.1 - k * 0.38);
-      return { c, k, fvs: fvs(clamp(w, 100, 900), 144, italic ? 100 : 30, italic ? 1 : 0) };
-    });
-  });
-}
-
 /** Glyph-scramble decode effect: returns the text partially scrambled for a short time after it changes. */
 export class Decoder {
   private seen = new Map<string, { text: string; t: number }>();

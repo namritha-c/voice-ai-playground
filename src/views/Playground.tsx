@@ -425,10 +425,10 @@ export default function Playground({ mode }: { mode: Mode }) {
         <Backdrop />
         <div className="hero">
           <div className="hero-copy">
-            <Headline key={mode} mode={mode} t={t} energy={energy} />
+            <Headline key={mode} mode={mode} />
             <Chain rows={chainRows} live={phase === 'busy' || live} done={phase === 'ready'} />
           </div>
-          <Orb accent={ACCENTS[mode]} t={t} energy={energy} progress={mode === 'stt' ? 0 : progress} level={lvl} phaseLabel={phaseLabel} title={centerTitle} sub={centerSub} />
+          <Orb t={t} energy={energy} progress={mode === 'stt' ? 0 : progress} level={lvl} phaseLabel={phaseLabel} title={centerTitle} sub={centerSub} />
         </div>
 
         <section aria-label="Input" className="input-panel" {...dropProps}>
@@ -485,14 +485,14 @@ export default function Playground({ mode }: { mode: Mode }) {
 
           {mode === 'sts' && (
             <div className="sts-src">
-              <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
-                <div className="wbars" style={{ height: 80 }}>
+              <div className="sts-card">
+                <div className="lbl">Source take</div>
+                <div className="wbars sts-wave">
                   {srcBars.map((b, i) => <div key={i} className="wb" style={{ height: b.h.toFixed(1) + 'px', background: b.c }} />)}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <button className="icon-btn sm" aria-label={srcRec ? 'Stop recording' : 'Record source'} onClick={toggleSrcRec}
-                    style={{ borderColor: srcRec ? 'var(--accent)' : undefined }} disabled={phase === 'busy'}>
-                    {srcRec ? <span className="blink" style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--accent)' }} /> : <IconMic />}
+                <div className="sts-controls">
+                  <button className={`sts-rec${srcRec ? ' live' : ''}`} aria-label={srcRec ? 'Stop recording' : 'Record source'} onClick={toggleSrcRec} disabled={phase === 'busy'}>
+                    {srcRec ? <span className="blink" style={{ width: 12, height: 12, borderRadius: 3, background: 'currentColor' }} /> : <IconMic />}
                   </button>
                   <button className="icon-btn sm" aria-label="Upload audio file" onClick={() => fileInput.current?.click()} disabled={srcRec || phase === 'busy'}><IconUpload /></button>
                   {take && !srcRec && (
@@ -502,18 +502,19 @@ export default function Playground({ mode }: { mode: Mode }) {
                       void inputAudio.current.play();
                     }}><IconPlay size={13} /></button>
                   )}
-                  <span className="mono" style={{ fontSize: 12, letterSpacing: '0.03em', color: 'var(--mute)', marginLeft: 4 }}>
-                    {srcRec ? `Recording… ${fmt(now() - recAt)}` : take ? `[${take.name}] · ${fmt(take.duration)}` : 'Record or drop a source take'}
+                  <span className="mono sts-status ellipsis">
+                    {srcRec ? `Recording… ${fmt(now() - recAt)}` : take ? `${take.name} · ${fmt(take.duration)}` : 'Record or drop a source take'}
                   </span>
                 </div>
               </div>
-              <svg aria-hidden="true" width="56" height="24" viewBox="0 0 56 24">
+              <svg className="sts-flow" aria-hidden="true" width="56" height="24" viewBox="0 0 56 24">
                 <line className={phase === 'busy' ? 'flow fast' : 'flow'} x1="0" y1="12" x2="46" y2="12" stroke="var(--accent)" strokeWidth="1.5" />
                 <path d="M44 6l8 6-8 6" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <div style={{ width: 200, flexShrink: 0 }}>
-                <div className="serif ellipsis" style={{ fontSize: 36, fontStyle: 'italic', letterSpacing: '-0.03em', color: 'var(--accent)', lineHeight: 1.05 }}>{voice?.name ?? '—'}</div>
-                <div className="mono ellipsis" style={{ fontSize: 11.5, letterSpacing: '0.03em', color: 'var(--mute)' }}>{voice?.id ?? ''}</div>
+              <div className="sts-card sts-target">
+                <div className="lbl">Target voice</div>
+                {voice ? <div className="serif ellipsis sts-name">{voice.name}</div> : <div className="serif sts-none">Pick a voice</div>}
+                <div className="mono sts-status ellipsis">{provider?.name ?? ''}</div>
               </div>
             </div>
           )}
