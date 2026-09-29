@@ -4,7 +4,7 @@
  * Only params the manifest declares survive, so a provider never receives an
  * option it does not understand (no `emotion` for providers without one, etc.).
  */
-import type { ParamSpec } from '@/api/client';
+import type { ParamSpec } from '@/api/types';
 import { ProviderError } from './base';
 
 /** Params and voices may be limited to some models via a `models` list. */

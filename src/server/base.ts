@@ -9,7 +9,7 @@
  * (see `params.ts`), so they only need to map them onto the provider's API.
  */
 import 'server-only';
-import type { Voice, Word } from '@/api/client';
+import type { Voice, Word } from '@/api/types';
 
 export class ProviderError extends Error {
   constructor(message: string, readonly status = 502) {
@@ -19,10 +19,11 @@ export class ProviderError extends Error {
 
 type Params = Record<string, unknown>;
 
-export interface TTSRequest { model: string; voice: string | null; text: string; params: Params }
+/** Every request carries the caller's own API key (BYOK). The server holds no keys. */
+export interface TTSRequest { key: string; model: string; voice: string | null; text: string; params: Params }
 /** `audio` is 16 kHz mono 16-bit WAV, produced by the web client. */
-export interface STTRequest { model: string; audio: Uint8Array; mime: string; params: Params }
-export interface STSRequest { model: string; voice: string | null; audio: Uint8Array; mime: string; params: Params }
+export interface STTRequest { key: string; model: string; audio: Uint8Array; mime: string; params: Params }
+export interface STSRequest { key: string; model: string; voice: string | null; audio: Uint8Array; mime: string; params: Params }
 
 export interface AudioResult { audio: Uint8Array; mime: string; ext: string; metric_ms: number; request_preview: string }
 export interface TranscriptResult { text: string; metric_ms: number; words: Word[]; language: string | null; request_preview: string }
@@ -32,17 +33,7 @@ export interface ProviderAdapter {
   stt?(req: STTRequest): Promise<TranscriptResult>;
   sts?(req: STSRequest): Promise<AudioResult>;
   /** Only called when the manifest declares `voices.source == "dynamic"`. */
-  listVoices?(mode: string): Promise<Voice[]>;
-}
-
-export function env(name: string): string {
-  return process.env[name] ?? '';
-}
-
-export function key(name: string): string {
-  const v = env(name);
-  if (!v) throw new ProviderError(`${name} is not set in the server environment`, 400);
-  return v;
+  listVoices?(mode: string, key: string): Promise<Voice[]>;
 }
 
 export const PROVIDER_TIMEOUT_MS = 90_000;
@@ -78,8 +69,11 @@ export async function request(id: string, url: string, init: RequestInit): Promi
   }
   const t1 = performance.now();
   const body = concat(chunks);
+  if (res.status === 401 || res.status === 403) {
+    throw new ProviderError(`${id} rejected your API key (${res.status}). Check it and paste a new one.`, 401);
+  }
   if (res.status >= 400) {
-    throw new ProviderError(`${id} returned ${res.status}: ${errText(body)}`, res.status === 400 || res.status === 422 ? 400 : 502);
+    throw new ProviderError(`${id} returned ${res.status}: ${redact(errText(body), init.headers)}`, res.status === 400 || res.status === 422 ? 400 : 502);
   }
   return {
     body,
@@ -95,6 +89,19 @@ function concat(chunks: Uint8Array[]): Uint8Array {
   const out = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
   let o = 0;
   for (const c of chunks) { out.set(c, o); o += c.length; }
+  return out;
+}
+
+/** Upstream error text can echo a credential back. Strip every header value we sent before it reaches the client. */
+function redact(text: string, headers: HeadersInit | undefined): string {
+  if (!headers) return text;
+  let out = text;
+  for (const [k, v] of Object.entries(headers as Record<string, string>)) {
+    if (!SECRET_HEADERS.has(k.toLowerCase())) continue;
+    for (const secret of new Set([v, v.replace(/^(Bearer|Token)\s+/i, '')])) {
+      if (secret.length >= 6) out = out.split(secret).join('***');
+    }
+  }
   return out;
 }
 

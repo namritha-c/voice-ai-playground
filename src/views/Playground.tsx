@@ -3,17 +3,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { ThinkingOrb, type OrbState } from 'thinking-orbs';
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
-import { api, appliesTo, type Mode, type ParamSpec, type Provider, type Run, type Voice } from '../api/client';
+import { api, ApiError, appliesTo, type Mode, type ParamSpec, type Provider, type Run, type Voice } from '../api/client';
 import ParamField from '../components/controls/ParamField';
 import ProviderPicker from '../components/controls/ProviderPicker';
 import VoiceGrid from '../components/controls/VoiceGrid';
-import { IconChevron, IconMic, IconPause, IconPlay, IconReset, IconStop, IconUpload, IconWave } from '../components/Icons';
+import { IconChevron, IconKey, IconMic, IconPause, IconPlay, IconReset, IconStop, IconUpload, IconWave } from '../components/Icons';
+import { useKeySheet } from '../components/KeySheet';
 import OutputBar, { type Bar } from '../components/playground/OutputBar';
 import { Backdrop, Chain, Headline, Orb, type Energy } from '../components/playground/Hero';
 import { ACCENTS, Decoder, clamp, fmt, rng, hash } from '../lib/anim';
 import { level as liveLevel, meter, peaksFromUrl, startRecording, toWav16k, type Recorder } from '../lib/audio';
 import { now, useClock } from '../lib/useClock';
+import { useKeys } from '../state/keys';
 import { actions, k, useSelection } from '../state/playground';
+import { useProviders } from '../state/useProviders';
 import { useToast } from '../components/Toast';
 
 type Phase = 'idle' | 'recording' | 'busy' | 'ready';
@@ -31,9 +34,11 @@ export default function Playground({ mode }: { mode: Mode }) {
   const t = useClock();
   const toast = useToast();
   const sel = useSelection();
+  const sheet = useKeySheet();
+  const held = useKeys();
 
   // ---------- provider / model / voice / params resolution ----------
-  const providersQ = useQuery({ queryKey: ['providers'], queryFn: api.providers });
+  const providersQ = useProviders();
   const list = useMemo(() => (providersQ.data ?? []).filter((p) => p.modes[mode]), [providersQ.data, mode]);
   const provider: Provider | undefined = list.find((p) => p.id === sel.provider[mode]) ?? list.find((p) => p.connected) ?? list[0];
   const spec = provider?.modes[mode];
@@ -41,7 +46,7 @@ export default function Playground({ mode }: { mode: Mode }) {
   const model = spec ? (spec.models.includes(sel.model[key]) ? sel.model[key] : spec.models[0]) : '';
 
   const voicesQ = useQuery({
-    queryKey: ['voices', provider?.id, mode, provider?.connected],
+    queryKey: ['voices', provider?.id, mode, provider ? held[provider.id]?.key.slice(-6) ?? '' : ''],
     queryFn: () => api.voices(provider!.id, mode),
     enabled: !!spec?.voices,
     staleTime: 5 * 60_000,
@@ -120,9 +125,15 @@ export default function Playground({ mode }: { mode: Mode }) {
   // ---------- actions ----------
   const cfg = () => ({ provider: provider!.id, model, voice: voice?.id ?? null, voice_name: voice?.name ?? null, params: paramPayload() });
 
+  // A rejected key needs the person to fix it, so open the key sheet with the reason instead of a toast.
+  const fail = (e: unknown) => {
+    if (e instanceof ApiError && e.status === 401 && provider) sheet.open(provider.id, e.message);
+    else toast.error((e as Error).message);
+  };
+
   const ensureReady = (): boolean => {
     if (!provider || !spec) return false;
-    if (!provider.connected) { toast.error(`${provider.name} has no API key. Add ${provider.missing_env.join(', ')} to the server environment (.env.local, or the Vercel project settings) and redeploy.`); return false; }
+    if (!provider.connected) { sheet.open(provider.id); return false; }
     if (spec.voices && !voice) { toast.error('Pick a voice first.'); return false; }
     return true;
   };
@@ -149,7 +160,7 @@ export default function Playground({ mode }: { mode: Mode }) {
       playOutput(r.audio_url);
     } catch (e) {
       setPhase(run ? 'ready' : 'idle');
-      toast.error((e as Error).message);
+      fail(e);
     }
   };
 
@@ -160,7 +171,7 @@ export default function Playground({ mode }: { mode: Mode }) {
       setResult(await api.stt(tk.wav, cfg()));
     } catch (e) {
       setPhase(run ? 'ready' : 'idle');
-      toast.error((e as Error).message);
+      fail(e);
     }
   };
 
@@ -175,7 +186,7 @@ export default function Playground({ mode }: { mode: Mode }) {
       playOutput(r.audio_url);
     } catch (e) {
       setPhase(run ? 'ready' : 'idle');
-      toast.error((e as Error).message);
+      fail(e);
     }
   };
 
@@ -265,7 +276,7 @@ export default function Playground({ mode }: { mode: Mode }) {
       await el.play();
     } catch (e) {
       setPreviewing(null);
-      toast.error(`Preview failed: ${(e as Error).message}`);
+      if (e instanceof ApiError && e.status === 401) fail(e); else toast.error(`Preview failed: ${(e as Error).message}`);
     }
   };
 
@@ -376,7 +387,8 @@ export default function Playground({ mode }: { mode: Mode }) {
   const revealN = Math.floor((t - resultAt) * 14);
   const showSpeakers = words.some((w) => w.speaker !== null && w.speaker !== undefined);
 
-  const genLabel = mode === 'stt'
+  const needsKey = !!provider && !provider.connected;
+  const genLabel = needsKey ? `Add your ${provider.name} key` : mode === 'stt'
     ? (phase === 'recording' ? 'Stop & transcribe' : phase === 'busy' ? 'Transcribing…' : 'Start recording')
     : phase === 'busy' ? (mode === 'tts' ? 'Synthesizing…' : 'Converting…') : (mode === 'tts' ? 'Generate speech' : 'Convert voice');
 
@@ -577,9 +589,10 @@ export default function Playground({ mode }: { mode: Mode }) {
           )}
         </div>
 
-        <button className={`gen${phase === 'busy' || live ? ' busy' : ''}`} onClick={primary}
-          disabled={!provider || phase === 'busy' || srcRec || (mode === 'sts' && !take)}>
-          {phase === 'busy' ? <ThinkingOrb state={BUSY_ORB[mode]} size={20} theme="light" /> : <IconWave size={18} />}
+        <button className={`gen${phase === 'busy' || live ? ' busy' : ''}${needsKey ? ' needs-key' : ''}`}
+          onClick={needsKey ? () => sheet.open(provider.id) : primary}
+          disabled={!provider || phase === 'busy' || srcRec || (!needsKey && mode === 'sts' && !take)}>
+          {needsKey ? <IconKey size={18} /> : phase === 'busy' ? <ThinkingOrb state={BUSY_ORB[mode]} size={20} theme="light" /> : <IconWave size={18} />}
           <span>{genLabel}</span>
         </button>
       </aside>

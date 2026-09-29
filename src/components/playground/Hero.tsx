@@ -4,6 +4,7 @@ import type { Mode } from '../../api/client';
 import { clamp, fvs, headlineWeights } from '../../lib/anim';
 import { spectrum } from '../../lib/audio';
 import type { OrbSignal } from './OrbGL';
+import OrbCore from './OrbCore';
 
 // three.js is only needed on the playground; load it on demand, in the browser.
 const OrbGL = dynamic(() => import('./OrbGL'), { ssr: false });
@@ -95,6 +96,7 @@ export function Orb({ t, energy, progress, level, phaseLabel, title, sub, accent
         <g className="orbit o2"><circle cx="0" cy="138" r="2.2" fill="#F2EDE4" /></g>
         <g className="orbit o3"><circle cx="158" cy="0" r="1.6" fill="#F2EDE4" fillOpacity="0.6" /></g>
       </svg>
+      <OrbCore accent={accent} energy={energy} />
       <OrbGL signal={signal} color={accent} />
       <div className="breathe" aria-hidden="true">{bars}</div>
       <div role="status" aria-live="polite" className="orb-center">

@@ -28,7 +28,7 @@ export default function ProviderPicker({ mode, providers, current, onPick }: {
         <div style={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span className="serif ellipsis" style={{ fontSize: 22, lineHeight: 1, letterSpacing: '-0.015em', fontVariationSettings: "'opsz' 36, 'wght' 420" }}>{current?.name ?? 'Loading…'}</span>
           <span className="mono ellipsis" style={{ fontSize: 10.5, letterSpacing: '0.06em', color: 'var(--mute)' }}>
-            {current ? (current.connected ? tag(current) : `NO KEY · set ${current.missing_env.join(', ')}`) : ''}
+            {current ? (current.connected ? tag(current) : 'No key yet · add one to use it') : ''}
           </span>
         </div>
         <span style={{ color: 'var(--ink-3)', transform: `rotate(${open ? 180 : 0}deg)`, transition: 'transform .3s', display: 'flex' }}><IconChevron /></span>
@@ -45,7 +45,7 @@ export default function ProviderPicker({ mode, providers, current, onPick }: {
                   <span className="pn">{p.name}</span>
                   <span className="mono ellipsis" style={{ fontSize: 10, letterSpacing: '0.06em', color: 'var(--mute)' }}>{tag(p)}</span>
                 </div>
-                {!p.connected && <span className="nokey">NO KEY</span>}
+                {!p.connected && <span className="nokey">ADD KEY</span>}
               </button>
             );
           })}

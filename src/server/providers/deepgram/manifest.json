@@ -2,7 +2,7 @@
   "id": "deepgram",
   "name": "Deepgram",
   "mono": "Dg",
-  "env": ["DEEPGRAM_API_KEY"],
+  "key_url": "https://console.deepgram.com/",
   "modes": {
     "tts": {
       "tag": "Aura · low-latency TTS",

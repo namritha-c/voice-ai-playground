@@ -2,7 +2,7 @@
   "id": "sarvam",
   "name": "Sarvam AI",
   "mono": "Sv",
-  "env": ["SARVAM_API_KEY"],
+  "key_url": "https://dashboard.sarvam.ai/",
   "modes": {
     "tts": {
       "tag": "Indic languages",

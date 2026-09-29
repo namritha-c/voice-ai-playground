@@ -1,5 +1,5 @@
-import type { Word } from '@/api/client';
-import { curlPreview, key, ProviderError, request, type ProviderAdapter } from '../../base';
+import type { Word } from '@/api/types';
+import { curlPreview, ProviderError, request, type ProviderAdapter } from '../../base';
 
 const ID = 'deepgram';
 const BASE = 'https://api.deepgram.com/v1';
@@ -10,7 +10,7 @@ const ENC: Record<string, [Record<string, string>, string, string]> = {
   flac: [{ encoding: 'flac' }, 'audio/flac', 'flac'],
 };
 
-const h = () => ({ Authorization: `Token ${key('DEEPGRAM_API_KEY')}` });
+const h = (key: string) => ({ Authorization: `Token ${key}` });
 
 export const adapter: ProviderAdapter = {
   async tts(req) {
@@ -18,7 +18,7 @@ export const adapter: ProviderAdapter = {
     const [q, mime, ext] = ENC[String(req.params.encoding ?? 'mp3')];
     // Deepgram addresses TTS by voice model id, e.g. aura-2-thalia-en
     const url = `${BASE}/speak?${new URLSearchParams({ model: req.voice, ...q })}`;
-    const headers = { ...h(), 'Content-Type': 'application/json' };
+    const headers = { ...h(req.key), 'Content-Type': 'application/json' };
     const body = { text: req.text };
     const r = await request(ID, url, { method: 'POST', headers, body: JSON.stringify(body) });
     return { audio: r.body, mime, ext, metric_ms: r.ttfb_ms, request_preview: curlPreview('POST', url, { headers, json: body }) };
@@ -30,7 +30,7 @@ export const adapter: ProviderAdapter = {
     for (const k of ['smart_format', 'punctuate', 'diarize', 'filler_words']) if (k in p) qs.set(k, String(p[k]));
     for (const term of String(p.keyterm ?? '').split(',').map((t) => t.trim()).filter(Boolean)) qs.append('keyterm', term);
     const url = `${BASE}/listen?${qs}`;
-    const headers = { ...h(), 'Content-Type': req.mime };
+    const headers = { ...h(req.key), 'Content-Type': req.mime };
     const r = await request(ID, url, { method: 'POST', headers, body: req.audio as BodyInit });
     const ch = r.json().results.channels[0];
     const alt = ch.alternatives[0];

@@ -1,14 +1,19 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { Mode } from '../api/client';
 import { level } from '../lib/audio';
 import { useClock } from '../lib/useClock';
 import Header from './Header';
+import { KeySheetProvider } from './KeySheet';
 import Rail from './Rail';
 import { ToastProvider } from './Toast';
+
+// three.js and the gradient shaders load after first paint so they never block the chrome.
+const Aurora = dynamic(() => import('./Aurora'), { ssr: false });
 
 const noop = () => () => {};
 
@@ -23,7 +28,9 @@ export default function Shell({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={qc}>
       <ToastProvider>
-        <Chrome>{children}</Chrome>
+        <KeySheetProvider>
+          <Chrome>{children}</Chrome>
+        </KeySheetProvider>
       </ToastProvider>
     </QueryClientProvider>
   );
@@ -35,6 +42,7 @@ function Chrome({ children }: { children: ReactNode }) {
   const mode = (path.match(/^\/(tts|stt|sts)/)?.[1] as Mode | undefined) ?? null;
   return (
     <div className={`app mode-${mode ?? 'tts'}`}>
+      <Aurora mode={mode} />
       <Rail />
       <div className="col">
         <Header mode={mode} t={t} level={mode ? level() : 0} />

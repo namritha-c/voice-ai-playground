@@ -1,7 +1,7 @@
 /** The providers this app ships with. Add one by adding its folder and a line below. */
 import 'server-only';
-import { MODES, type Mode, type ModeSpec, type Provider as PublicProvider } from '@/api/client';
-import { env, ProviderError, type ProviderAdapter } from './base';
+import { MODES, type Mode, type ModeSpec, type ProviderInfo } from '@/api/types';
+import { ProviderError, type ProviderAdapter } from './base';
 import { adapter as deepgram } from './providers/deepgram/adapter';
 import deepgramManifest from './providers/deepgram/manifest.json';
 import { adapter as elevenlabs } from './providers/elevenlabs/adapter';
@@ -13,7 +13,8 @@ export interface Manifest {
   id: string;
   name: string;
   mono?: string;
-  env: string[];
+  /** Where a user creates an API key for this provider. */
+  key_url: string;
   modes: Partial<Record<Mode, ModeSpec>>;
 }
 
@@ -22,8 +23,6 @@ export class Provider {
 
   get id() { return this.manifest.id; }
   get name() { return this.manifest.name; }
-  get missingEnv() { return this.manifest.env.filter((k) => !env(k)); }
-  get connected() { return this.missingEnv.length === 0; }
 
   mode(mode: string): ModeSpec {
     const m = this.manifest.modes[mode as Mode];
@@ -31,14 +30,13 @@ export class Provider {
     return m;
   }
 
-  public(): PublicProvider {
+  public(): ProviderInfo {
     const m = this.manifest;
     return {
       id: m.id,
       name: m.name,
       mono: m.mono ?? m.name.slice(0, 2),
-      connected: this.connected,
-      missing_env: this.missingEnv,
+      key_url: m.key_url,
       caps: MODES.filter((k) => k in m.modes),
       modes: m.modes,
     };

@@ -2,7 +2,7 @@
   "id": "elevenlabs",
   "name": "ElevenLabs",
   "mono": "11",
-  "env": ["ELEVENLABS_API_KEY"],
+  "key_url": "https://elevenlabs.io/app/settings/api-keys",
   "modes": {
     "tts": {
       "tag": "Multilingual · streaming",

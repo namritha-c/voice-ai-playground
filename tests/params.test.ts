@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ParamSpec } from '@/api/client';
+import type { ParamSpec } from '@/api/types';
 import { ProviderError } from '@/server/base';
 import { normalize } from '@/server/params';
 

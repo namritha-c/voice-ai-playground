@@ -1,9 +1,11 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api, type Mode } from '../api/client';
 import { fvs } from '../lib/anim';
+import { useProviders } from '../state/useProviders';
 
 const TABS: [Mode, string, string][] = [['tts', 'Text to Speech', 'TTS'], ['stt', 'Speech to Text', 'STT'], ['sts', 'Speech to Speech', 'STS']];
 
@@ -24,7 +26,8 @@ export default function Header({ mode, t, level }: { mode: Mode | null; t: numbe
   const router = useRouter();
   const idx = mode ? TABS.findIndex((x) => x[0] === mode) : 0;
   const health = useQuery({ queryKey: ['health'], queryFn: api.health, refetchInterval: 15000, retry: false });
-  const up = health.isSuccess;
+  const { data: providers } = useProviders();
+  const held = providers.filter((p) => p.connected).length;
   return (
     <header className="header">
       <div className="brand">
@@ -40,10 +43,16 @@ export default function Header({ mode, t, level }: { mode: Mode | null; t: numbe
         ))}
       </div>
       <div className="header-right">
-        <span className="mono api-state" title={up ? 'API reachable' : 'API not reachable'}>
-          <span className="dot" style={{ background: up ? 'var(--stt)' : health.isLoading ? 'var(--mute)' : 'var(--danger)' }} />
-          {up ? 'API ONLINE' : health.isLoading ? 'CONNECTING' : 'API OFFLINE'}
-        </span>
+        {health.isError ? (
+          <span className="mono api-state" title="The server is not reachable">
+            <span className="dot" style={{ background: 'var(--danger)' }} />API OFFLINE
+          </span>
+        ) : (
+          <Link href="/providers" className="keys-chip" title="Your API keys stay in this browser">
+            <span className="dot" style={{ background: held ? 'var(--stt)' : 'var(--accent)' }} />
+            {held ? `${held} of ${providers.length} keys added` : 'Add API keys'}
+          </Link>
+        )}
       </div>
     </header>
   );

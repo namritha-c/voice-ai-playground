@@ -1,13 +1,15 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api, MODES, type Mode } from '../api/client';
-import { IconSearch } from '../components/Icons';
+import { MODES, type Mode } from '../api/client';
+import { IconKey, IconSearch } from '../components/Icons';
+import { useKeySheet } from '../components/KeySheet';
 import { CAP_STYLE, fvs } from '../lib/anim';
 import { useClock } from '../lib/useClock';
+import { keys, maskKey } from '../state/keys';
 import { actions } from '../state/playground';
+import { useProviders } from '../state/useProviders';
 
 const FILTERS: [Mode | 'all', string][] = [['all', 'All'], ['tts', 'Text to Speech'], ['stt', 'Speech to Text'], ['sts', 'Speech to Speech']];
 
@@ -46,11 +48,13 @@ export default function Providers() {
   const t = useClock(20);
   const [f, setF] = useState<Mode | 'all'>('all');
   const [q, setQ] = useState('');
-  const { data = [], isError, isLoading } = useQuery({ queryKey: ['providers'], queryFn: api.providers });
+  const sheet = useKeySheet();
+  const { data, isError, isLoading } = useProviders();
   const shown = data.filter((p) => (f === 'all' || p.caps.includes(f)) && (!q || p.name.toLowerCase().includes(q.toLowerCase())));
   const connected = data.filter((p) => p.connected).length;
 
-  const open = (pid: string, caps: Mode[]) => {
+  const open = (pid: string, caps: Mode[], connected: boolean) => {
+    if (!connected) return sheet.open(pid);
     const m = f !== 'all' && caps.includes(f) ? f : caps[0];
     actions.provider(m, pid);
     router.push(`/${m}`);
@@ -65,7 +69,7 @@ export default function Providers() {
           <span className="serif" style={{ fontSize: 30, lineHeight: 1, fontStyle: 'italic', letterSpacing: '-0.02em', fontVariationSettings: "'opsz' 36, 'wght' 380, 'SOFT' 100, 'WONK' 1", fontVariantNumeric: 'lining-nums' }}>
             {connected}<span style={{ color: 'var(--mute-2)' }}> / {data.length}</span>
           </span>
-          <span className="mono" style={{ fontSize: 10, letterSpacing: '0.22em', color: 'var(--mute)' }}>CONNECTED</span>
+          <span className="mono" style={{ fontSize: 11, letterSpacing: '0.14em', color: 'var(--mute)' }}>KEYS ADDED</span>
         </div>
         <div style={{ flexGrow: 1 }} />
         <div style={{ position: 'relative', width: 280, paddingBottom: 12 }}>
@@ -92,21 +96,24 @@ export default function Providers() {
 
       <div className="pgrid" style={{ position: 'relative' }}>
         {shown.map((p, i) => (
-          <button key={p.id} className="card" style={{ animationDelay: `${(0.35 + i * 0.06).toFixed(2)}s` }} onClick={() => open(p.id, p.caps)}
-            aria-label={`${p.name}, ${p.connected ? 'connected' : 'no API key set'}, supports ${p.caps.join(', ').toUpperCase()}`}
-            title={p.connected ? `Open ${p.name} in the playground` : `Set ${p.missing_env.join(', ')} in the server environment`}>
+          <div key={p.id} className="card link" style={{ animationDelay: `${(0.35 + i * 0.06).toFixed(2)}s` }}>
+            <button className="card-hit" onClick={() => open(p.id, p.caps, p.connected)}
+              aria-label={p.connected ? `Open ${p.name} in the playground` : `Add your ${p.name} API key`} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
               <span className="mono-tile" style={{ width: 46, height: 46, borderRadius: 13, fontSize: 20, color: p.connected ? 'var(--tts)' : 'var(--mute)' }}>{p.mono}</span>
-              <span className="mono" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 10, letterSpacing: '0.18em', color: p.connected ? 'var(--ink)' : 'var(--mute)' }}>
+              <button className={`card-key${p.connected ? ' on' : ''}`} onClick={() => sheet.open(p.id)}
+                aria-label={p.connected ? `Manage your ${p.name} key` : `Add your ${p.name} key`}>
                 {p.connected ? (
-                  <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 2, height: 14 }}>
-                    <span className="eq live" style={{ height: 9, background: 'var(--ink)' }} />
-                    <span className="eq live" style={{ height: 14, animationDelay: '.15s', background: 'var(--ink)' }} />
-                    <span className="eq live" style={{ height: 7, animationDelay: '.3s', background: 'var(--ink)' }} />
-                  </span>
-                ) : <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: '50%', border: '1px solid var(--mute-2)' }} />}
-                {p.connected ? 'CONNECTED' : 'NO KEY'}
-              </span>
+                  <>
+                    <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 2, height: 14 }}>
+                      <span className="eq live" style={{ height: 9, background: 'var(--ink)' }} />
+                      <span className="eq live" style={{ height: 14, animationDelay: '.15s', background: 'var(--ink)' }} />
+                      <span className="eq live" style={{ height: 7, animationDelay: '.3s', background: 'var(--ink)' }} />
+                    </span>
+                    Key {maskKey(keys.get(p.id))}
+                  </>
+                ) : <><IconKey size={13} />Add key</>}
+              </button>
             </div>
             <div className="nm" style={{ marginTop: 'auto' }}>{p.name}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 16, width: '100%' }}>
@@ -115,9 +122,9 @@ export default function Providers() {
                 return <span key={c} className="cap" style={{ border: `1px solid ${on ? CAP_STYLE[c][1] : 'var(--line-2)'}`, color: on ? CAP_STYLE[c][1] : 'var(--mute-3)', background: on ? CAP_STYLE[c][2] : 'transparent' }}>{CAP_STYLE[c][0]}</span>;
               })}
               <div style={{ flexGrow: 1 }} />
-              <span className="mono" style={{ fontSize: 10, letterSpacing: '0.04em', color: 'var(--mute-2)' }}>{p.id}</span>
+              <span className="mono" style={{ fontSize: 11, letterSpacing: '0.04em', color: 'var(--mute-2)' }}>{p.id}</span>
             </div>
-          </button>
+          </div>
         ))}
         {!isLoading && !isError && (
           <div className="card add" style={{ animationDelay: `${(0.35 + shown.length * 0.06).toFixed(2)}s` }}>
@@ -130,6 +137,7 @@ export default function Providers() {
           </div>
         )}
       </div>
+      {!isLoading && !isError && <p className="page-note">Your keys stay in this browser. Resonance’s server has none, and only forwards yours to the provider each request is for.</p>}
     </main>
   );
 }

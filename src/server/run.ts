@@ -1,13 +1,25 @@
 /** Shared request handling for the run routes (tts / stt / sts / preview). Nothing is stored. */
 import 'server-only';
-import type { Mode, RunMeta } from '@/api/client';
+import type { Mode, RunMeta } from '@/api/types';
 import { ProviderError, type AudioResult } from './base';
 import { applies, normalize } from './params';
-import { get } from './registry';
+import { get, type Provider } from './registry';
 
 /** Vercel Functions cap request bodies at 4.5 MB; stay under it with room for the form fields. */
 export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 export const META_HEADER = 'X-Resonance-Meta';
+export const KEY_HEADER = 'X-Provider-Key';
+
+/**
+ * BYOK: the caller's own API key arrives in a header on every request. The server keeps no keys,
+ * never stores or logs this one, and only forwards it to the provider it belongs to.
+ */
+export function apiKey(req: Request, p: Provider): string {
+  const key = req.headers.get(KEY_HEADER)?.trim() ?? '';
+  if (!key) throw new ProviderError(`Add your ${p.name} API key to use it.`, 401);
+  if (key.length > 512) throw new ProviderError(`That doesn't look like a ${p.name} API key.`, 400);
+  return key;
+}
 
 /** Turn a thrown error into the `{ detail }` JSON the client expects. */
 export async function handle(fn: () => Promise<Response>): Promise<Response> {
@@ -28,7 +40,6 @@ export function newId(): string {
 export function prepare(mode: Mode, pid: string, model: string, voice: string | null | undefined, raw: Record<string, unknown> | undefined) {
   const p = get(pid);
   const spec = p.mode(mode);
-  if (!p.connected) throw new ProviderError(`${p.name} has no API key — set ${p.missingEnv.join(', ')} in the server environment`, 400);
   if (!spec.models.includes(model)) throw new ProviderError(`unknown model '${model}' for ${p.name}`, 400);
   const vs = spec.voices;
   if (vs) {

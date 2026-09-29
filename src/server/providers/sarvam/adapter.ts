@@ -1,10 +1,10 @@
-import type { Word } from '@/api/client';
-import { curlPreview, key, ProviderError, request, toForm, type ProviderAdapter } from '../../base';
+import type { Word } from '@/api/types';
+import { curlPreview, ProviderError, request, toForm, type ProviderAdapter } from '../../base';
 
 const ID = 'sarvam';
 const BASE = 'https://api.sarvam.ai';
 
-const h = () => ({ 'api-subscription-key': key('SARVAM_API_KEY') });
+const h = (key: string) => ({ 'api-subscription-key': key });
 
 export const adapter: ProviderAdapter = {
   async tts(req) {
@@ -17,7 +17,7 @@ export const adapter: ProviderAdapter = {
       ...Object.fromEntries(['pace', 'pitch', 'loudness', 'enable_preprocessing'].filter((k) => k in p).map((k) => [k, p[k]])),
     };
     const url = `${BASE}/text-to-speech`;
-    const headers = { ...h(), 'Content-Type': 'application/json' };
+    const headers = { ...h(req.key), 'Content-Type': 'application/json' };
     const r = await request(ID, url, { method: 'POST', headers, body: JSON.stringify(body) });
     const audios: string[] = r.json().audios ?? [];
     if (!audios.length) throw new ProviderError('sarvam returned no audio');
@@ -36,7 +36,7 @@ export const adapter: ProviderAdapter = {
     };
     const url = `${BASE}/speech-to-text`;
     const r = await request(ID, url, {
-      method: 'POST', headers: h(), body: toForm(form, { field: 'file', name: 'audio.wav', data: req.audio, mime: req.mime }),
+      method: 'POST', headers: h(req.key), body: toForm(form, { field: 'file', name: 'audio.wav', data: req.audio, mime: req.mime }),
     });
     const d = r.json();
     const ts = d.timestamps ?? {};
@@ -44,7 +44,7 @@ export const adapter: ProviderAdapter = {
     const words: Word[] = w.slice(0, Math.min(w.length, s.length, e.length)).map((text, i) => ({ text, start: s[i], end: e[i], speaker: null }));
     return {
       text: d.transcript ?? '', metric_ms: r.total_ms, words, language: d.language_code ?? null,
-      request_preview: curlPreview('POST', url, { headers: h(), form: { ...form, file: '@audio.wav' } }),
+      request_preview: curlPreview('POST', url, { headers: h(req.key), form: { ...form, file: '@audio.wav' } }),
     };
   },
 };

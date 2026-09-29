@@ -1,11 +1,11 @@
-import type { Voice, Word } from '@/api/client';
+import type { Voice, Word } from '@/api/types';
 import { pcm16ToWav } from '../../audio';
-import { curlPreview, key, ProviderError, request, toForm, type ProviderAdapter } from '../../base';
+import { curlPreview, ProviderError, request, toForm, type ProviderAdapter } from '../../base';
 
 const ID = 'elevenlabs';
 const BASE = 'https://api.elevenlabs.io/v1';
 
-const h = () => ({ 'xi-api-key': key('ELEVENLABS_API_KEY') });
+const h = (key: string) => ({ 'xi-api-key': key });
 
 function pick(p: Record<string, unknown>, keys: string[]) {
   return Object.fromEntries(keys.filter((k) => k in p).map((k) => [k, p[k]]));
@@ -27,7 +27,7 @@ export const adapter: ProviderAdapter = {
       model_id: req.model,
       voice_settings: pick(p, ['stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost']),
     };
-    const headers = { ...h(), 'Content-Type': 'application/json' };
+    const headers = { ...h(req.key), 'Content-Type': 'application/json' };
     const r = await request(ID, url, { method: 'POST', headers, body: JSON.stringify(body) });
     return { ...audio(r.body, fmt), metric_ms: r.ttfb_ms, request_preview: curlPreview('POST', url, { headers, json: body }) };
   },
@@ -42,7 +42,7 @@ export const adapter: ProviderAdapter = {
     if (p.language_code != null && p.language_code !== 'auto') form.language_code = String(p.language_code);
     const url = `${BASE}/speech-to-text`;
     const r = await request(ID, url, {
-      method: 'POST', headers: h(), body: toForm(form, { field: 'file', name: 'audio.wav', data: req.audio, mime: req.mime }),
+      method: 'POST', headers: h(req.key), body: toForm(form, { field: 'file', name: 'audio.wav', data: req.audio, mime: req.mime }),
     });
     const d = r.json();
     const words: Word[] = (d.words ?? [])
@@ -51,7 +51,7 @@ export const adapter: ProviderAdapter = {
         ({ text: w.text, start: w.start ?? null, end: w.end ?? null, speaker: w.speaker_id ?? null }));
     return {
       text: d.text ?? '', metric_ms: r.total_ms, words, language: d.language_code ?? null,
-      request_preview: curlPreview('POST', url, { headers: h(), form: { ...form, file: '@audio.wav' } }),
+      request_preview: curlPreview('POST', url, { headers: h(req.key), form: { ...form, file: '@audio.wav' } }),
     };
   },
 
@@ -65,16 +65,16 @@ export const adapter: ProviderAdapter = {
       remove_background_noise: String(p.remove_background_noise ?? false),
     };
     const r = await request(ID, url, {
-      method: 'POST', headers: h(), body: toForm(form, { field: 'audio', name: 'source.wav', data: req.audio, mime: req.mime }),
+      method: 'POST', headers: h(req.key), body: toForm(form, { field: 'audio', name: 'source.wav', data: req.audio, mime: req.mime }),
     });
     return {
       audio: r.body, mime: 'audio/mpeg', ext: 'mp3', metric_ms: r.ttfb_ms,
-      request_preview: curlPreview('POST', url, { headers: h(), form: { ...form, audio: '@source.wav' } }),
+      request_preview: curlPreview('POST', url, { headers: h(req.key), form: { ...form, audio: '@source.wav' } }),
     };
   },
 
-  async listVoices() {
-    const r = await request(ID, `${BASE}/voices`, { headers: h() });
+  async listVoices(_mode, key) {
+    const r = await request(ID, `${BASE}/voices`, { headers: h(key) });
     const title = (s: string) => s.replace(/\b\w/g, (c) => c.toUpperCase());
     return (r.json().voices ?? []).map((v: {
       voice_id: string; name: string; category?: string; preview_url?: string | null; labels?: Record<string, string>;
