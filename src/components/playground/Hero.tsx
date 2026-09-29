@@ -1,6 +1,12 @@
+import dynamic from 'next/dynamic';
+import { useEffect, useRef } from 'react';
 import type { Mode } from '../../api/client';
-import { blobPath, clamp, fvs, headlineWeights } from '../../lib/anim';
+import { clamp, fvs, headlineWeights } from '../../lib/anim';
 import { spectrum } from '../../lib/audio';
+import type { OrbSignal } from './OrbGL';
+
+// three.js is only needed on the playground; load it on demand, in the browser.
+const OrbGL = dynamic(() => import('./OrbGL'), { ssr: false });
 
 const HEADLINES: Record<Mode, [string, string]> = { tts: ['Give words', 'a voice.'], stt: ['Hear every', 'word.'], sts: ['Speak in', 'any voice.'] };
 
@@ -37,9 +43,11 @@ export function Chain({ rows, live, done }: { rows: string[]; live: boolean; don
   );
 }
 
-export function Orb({ t, energy, progress, level, phaseLabel, title, sub, motion = 1 }: {
-  t: number; energy: Energy; progress: number; level: number; phaseLabel: string; title: string; sub: string; motion?: number;
+export function Orb({ t, energy, progress, level, phaseLabel, title, sub, accent, motion = 1 }: {
+  t: number; energy: Energy; progress: number; level: number; phaseLabel: string; title: string; sub: string; accent: string; motion?: number;
 }) {
+  const signal = useRef<OrbSignal>({ energy, level });
+  useEffect(() => { signal.current = { energy, level }; });
   const busy = energy === 'busy', active = energy === 'live';
   const spec = active ? spectrum() : null;
   const N = 90;
@@ -65,7 +73,6 @@ export function Orb({ t, energy, progress, level, phaseLabel, title, sub, motion
     bars.push(<div key={i} className="ob" style={{ height: h.toFixed(1) + 'px', transform: `rotate(${((a * 180) / Math.PI).toFixed(2)}deg) translateY(-122px)`, opacity: (0.25 + 0.75 * Math.min(1, h / 46)).toFixed(2) }} />);
   }
   const lvl = clamp((sum / N - 5) / 18, 0, 1);
-  const amp = (active ? 10 + 8 * level : busy ? 6 : 3.5) * motion;
   return (
     <div className="orb">
       <svg aria-hidden="true" viewBox="-200 -200 400 400" style={{ overflow: 'visible' }}>
@@ -82,13 +89,13 @@ export function Orb({ t, energy, progress, level, phaseLabel, title, sub, motion
         <circle r="168" fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="1055.6"
           strokeDashoffset={(1055.6 * (1 - progress)).toFixed(1)} transform="rotate(-90)" />
         <g className="spin fast" opacity={busy ? 1 : 0}><circle r="168" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeDasharray="90 966" /></g>
-        <path d={blobPath(106, amp * 1.25, t, 1.7, 60)} fill="none" stroke="var(--accent)" strokeOpacity="0.35" strokeWidth="1" />
-        <path d={blobPath(92, amp, t, 1, 60)} fill="url(#orbcore)" stroke="var(--accent)" strokeOpacity="0.9" strokeWidth="1.5" />
+        <circle r="118" fill="url(#orbcore)" />
         <circle r="58" fill="none" stroke="#F2EDE4" strokeOpacity="0.08" strokeDasharray="2 4" />
         <g className="orbit"><circle cx="0" cy="-150" r="3.5" fill="var(--accent)" /></g>
         <g className="orbit o2"><circle cx="0" cy="138" r="2.2" fill="#F2EDE4" /></g>
         <g className="orbit o3"><circle cx="158" cy="0" r="1.6" fill="#F2EDE4" fillOpacity="0.6" /></g>
       </svg>
+      <OrbGL signal={signal} color={accent} />
       <div className="breathe" aria-hidden="true">{bars}</div>
       <div role="status" aria-live="polite" className="orb-center">
         <div className="mono orb-phase">

@@ -415,7 +415,7 @@ export default function Playground({ mode }: { mode: Mode }) {
             <Headline key={mode} mode={mode} t={t} energy={energy} />
             <Chain rows={chainRows} live={phase === 'busy' || live} done={phase === 'ready'} />
           </div>
-          <Orb t={t} energy={energy} progress={mode === 'stt' ? 0 : progress} level={lvl} phaseLabel={phaseLabel} title={centerTitle} sub={centerSub} />
+          <Orb accent={ACCENTS[mode]} t={t} energy={energy} progress={mode === 'stt' ? 0 : progress} level={lvl} phaseLabel={phaseLabel} title={centerTitle} sub={centerSub} />
         </div>
 
         <section aria-label="Input" className="input-panel" {...dropProps}>

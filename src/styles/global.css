@@ -204,9 +204,10 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
 
 .orb { position: relative; width: 400px; height: 400px; flex-shrink: 0; margin: 0 auto; }
 .orb > * { position: absolute; left: 0; top: 0; width: 400px; height: 400px; }
+.orb-gl { pointer-events: none; }
 .orb-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; pointer-events: none; }
 .orb-phase { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .2em; color: var(--ink-3); }
-.orb-title { font-size: 40px; font-style: italic; line-height: 1; letter-spacing: -.03em; text-align: center; max-width: 210px; padding: 0 6px 6px; }
+.orb-title { text-shadow: 0 0 22px var(--bg), 0 0 8px var(--bg); font-size: 40px; font-style: italic; line-height: 1; letter-spacing: -.03em; text-align: center; max-width: 210px; padding: 0 6px 6px; }
 .orb-sub { font-size: 12px; letter-spacing: .06em; color: var(--mute); }
 .ob { position: absolute; left: calc(50% - 1.5px); bottom: 50%; width: 3px; border-radius: 3px; transform-origin: 50% 100%; background: var(--accent); }
 
