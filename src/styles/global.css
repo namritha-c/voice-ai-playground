@@ -255,15 +255,15 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
 .input-panel:focus-within { border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: var(--glass-hi), 0 0 0 4px var(--accent-ring), 0 30px 80px -30px var(--accent-glow); }
 .script {
   flex-grow: 1; width: 100%; min-height: 0; resize: none; border: 0; outline: none; background: transparent; color: var(--ink);
-  font-family: var(--serif); font-size: 24px; line-height: 1.45; letter-spacing: -.01em; font-variation-settings: 'opsz' 36, 'wght' 340, 'SOFT' 60;
-  padding: 0; caret-color: var(--accent);
+  font-family: var(--serif); font-size: 20px; line-height: 1.6; letter-spacing: -.005em; font-variation-settings: 'opsz' 20, 'wght' 360, 'SOFT' 60;
+  max-width: 72ch; padding: 0; caret-color: var(--accent);
 }
 /* the panel's accent ring (.input-panel:focus-within) is the focus indicator here */
 .script:focus-visible { outline: none; }
 .script::placeholder { color: var(--mute-3); font-style: italic; }
 .foot { display: flex; justify-content: space-between; align-items: center; font-size: 11px; letter-spacing: .08em; color: var(--mute-2); }
 .foot .over { color: var(--danger); }
-.transcript { margin: 0; font-family: var(--serif); font-size: 24px; line-height: 1.5; letter-spacing: -.01em; font-variation-settings: 'opsz' 36, 'wght' 330; }
+.transcript { margin: 0; max-width: 72ch; font-family: var(--serif); font-size: 20px; line-height: 1.6; letter-spacing: -.005em; font-variation-settings: 'opsz' 20, 'wght' 350; }
 .stt-wait { display: flex; align-items: center; gap: 20px; }
 .transcript.empty { font-style: italic; color: var(--mute-3); font-variation-settings: 'opsz' 36, 'wght' 300; }
 .spk { flex-shrink: 0; padding-top: 12px; font-size: 10.5px; color: var(--accent); letter-spacing: .16em; font-family: var(--mono); }
