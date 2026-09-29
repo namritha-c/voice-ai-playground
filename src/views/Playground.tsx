@@ -333,12 +333,12 @@ export default function Playground({ mode }: { mode: Mode }) {
       voice ? `${voice.name.toUpperCase()} · ${voice.id}` : (promo ? `${promo.label.toUpperCase()} · ${promoVal}` : 'DEFAULT VOICE')]
   ).map((v, i) => decoder.get('c' + i, v, t));
 
-  const centerTitle = mode === 'stt' ? (promoVal || model) : voice?.name ?? model;
+  const centerTitle = mode === 'stt' ? provider?.name ?? model : voice?.name ?? model;
   const centerSub = srcRec ? fmt(now() - recAt)
     : phase === 'recording' ? fmt(now() - recAt)
     : phase === 'busy' ? (mode === 'stt' ? 'processing…' : 'first byte…')
     : playing ? fmt(cur)
-    : phase === 'idle' ? provider?.name ?? ''
+    : phase === 'idle' ? (mode === 'stt' ? [promoVal, model].filter(Boolean).join(' · ') : provider?.name ?? '')
     : mode === 'stt' ? `${run?.transcript?.words.length ?? run?.transcript?.text.split(/\s+/).length ?? 0} words` : fmt(dur);
 
   // output bars
