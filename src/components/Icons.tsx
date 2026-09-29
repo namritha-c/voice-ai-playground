@@ -19,3 +19,4 @@ export const IconStop = ({ size = 18 }: P) => <svg width={size} height={size} vi
 export const IconPause = ({ size = 18 }: P) => <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.2" /><rect x="14" y="4.5" width="4" height="15" rx="1.2" /></svg>;
 export const IconClose = ({ size = 16 }: P) => <svg {...S(size, 2)}><path d="M6 6l12 12M18 6L6 18" /></svg>;
 export const IconKey = ({ size = 16 }: P) => <svg {...S(size, 1.8)}><circle cx="8" cy="15" r="4" /><path d="M11 12l9-9M16 7l3 3M14 9l2 2" /></svg>;
+export const IconCheck = ({ size = 14 }: P) => <svg {...S(size, 2.2)}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;

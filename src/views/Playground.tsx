@@ -6,8 +6,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } fro
 import { api, ApiError, appliesTo, type Mode, type ParamSpec, type Provider, type Run, type Voice } from '../api/client';
 import ParamField from '../components/controls/ParamField';
 import ProviderPicker from '../components/controls/ProviderPicker';
+import Select from '../components/controls/Select';
 import VoiceGrid from '../components/controls/VoiceGrid';
-import { IconChevron, IconKey, IconMic, IconPause, IconPlay, IconReset, IconStop, IconUpload, IconWave } from '../components/Icons';
+import { IconKey, IconMic, IconPause, IconPlay, IconReset, IconStop, IconUpload, IconWave } from '../components/Icons';
 import { useKeySheet } from '../components/KeySheet';
 import OutputBar, { type Bar } from '../components/playground/OutputBar';
 import { Backdrop, Chain, Headline, Orb, type Energy } from '../components/playground/Hero';
@@ -548,12 +549,7 @@ export default function Playground({ mode }: { mode: Mode }) {
 
         <div className="field">
           <label htmlFor="model" className="lbl">Model</label>
-          <div style={{ position: 'relative' }}>
-            <select id="model" className="sel" value={model} onChange={(e) => provider && actions.model(mode, provider.id, e.target.value)}>
-              {(spec?.models ?? []).map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
-            <span style={{ position: 'absolute', right: 14, top: 15, pointerEvents: 'none', color: 'var(--ink-3)', display: 'flex' }}><IconChevron size={14} /></span>
-          </div>
+          <Select id="model" value={model} options={spec?.models ?? []} onChange={(m) => provider && actions.model(mode, provider.id, m)} />
         </div>
 
         {promo && (

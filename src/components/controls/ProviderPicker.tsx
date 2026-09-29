@@ -34,7 +34,7 @@ export default function ProviderPicker({ mode, providers, current, onPick }: {
         <span style={{ color: 'var(--ink-3)', transform: `rotate(${open ? 180 : 0}deg)`, transition: 'transform .3s', display: 'flex' }}><IconChevron /></span>
       </button>
       {open && (
-        <div className="pop prov-pop" role="listbox" aria-label="Providers">
+        <div className="pop menu prov-pop" role="listbox" aria-label="Providers">
           {providers.map((p) => {
             const sel = p.id === current?.id;
             return (

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Shell from '@/components/Shell';
 import '@/styles/global.css';
+import '@/styles/glass.css';
 
 export const metadata: Metadata = {
   title: 'Resonance Voice Lab',

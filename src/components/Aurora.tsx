@@ -8,9 +8,9 @@ import { useBlendedPalette } from '../lib/color';
 
 /** Dark, saturated triads per mode. The first colour carries the mode accent, the rest keep the field moody. */
 export const AURORA: Record<Mode, readonly [string, string, string]> = {
-  tts: ['#ff6a2b', '#8a1f0e', '#1d0a06'],
-  stt: ['#a6e35a', '#1d6a3a', '#06140b'],
-  sts: ['#b9a2ff', '#4a2aa8', '#0a0618'],
+  tts: ['#ff6a2b', '#5a1a08', '#ff9a5c'],
+  stt: ['#a6e35a', '#0f4a26', '#3fd08a'],
+  sts: ['#b9a2ff', '#3b1c9a', '#8a5cff'],
 };
 
 /** Audio level quantised to tenths, so a re-render happens only when the sound visibly changes. */
@@ -37,13 +37,13 @@ function Aurora({ mode }: { mode: Mode | null }) {
     <div className="aurora" aria-hidden="true">
       <ShaderGradientCanvas style={{ position: 'absolute', inset: 0 }} pixelDensity={0.7} fov={45} pointerEvents="none" powerPreference="low-power">
         <ShaderGradient
-          type="waterPlane" animate="on" grain="on" lightType="3d" envPreset="city"
+          type="plane" animate="on" grain="off" lightType="3d" envPreset="city"
           color1={c1} color2={c2} color3={c3}
-          brightness={1.05 + energy * 0.5} reflection={0.1}
-          uSpeed={0.16 + energy * 0.45} uStrength={2.8 + energy * 2.2} uDensity={1.2} uFrequency={0} uAmplitude={0}
-          cAzimuthAngle={170} cPolarAngle={70} cDistance={4.4} cameraZoom={1}
-          positionX={0} positionY={0.9} positionZ={-0.3}
-          rotationX={45} rotationY={0} rotationZ={0}
+          brightness={1.15 + energy * 0.5} reflection={0.1}
+          uSpeed={0.12 + energy * 0.4} uStrength={3 + energy * 1.6} uDensity={1.9 + energy * 0.4} uFrequency={5.5} uAmplitude={0}
+          cAzimuthAngle={180} cPolarAngle={90} cDistance={4.4} cameraZoom={1}
+          positionX={-1.4} positionY={0} positionZ={0}
+          rotationX={0} rotationY={10} rotationZ={50}
         />
       </ShaderGradientCanvas>
     </div>

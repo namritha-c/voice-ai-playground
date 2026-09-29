@@ -1,0 +1,170 @@
+/*
+ * Liquid glass for controls, on top of the panel surfaces in global.css.
+ * Panels (--glass, --blur) and the shader background belong to global.css; this file adds:
+ *   - raised controls: a lit rim and a sheen, so buttons read as glass sitting on the panel
+ *   - recessed inputs: darker wells with an inner shadow
+ *   - accent glass for anything selected
+ *   - a pointer-following highlight and edge refraction (see src/lib/glass.ts)
+ * Small controls have no backdrop-filter of their own: inside a blurred panel it has nothing new to show.
+ */
+:root {
+  --gl-fill: rgba(255, 255, 255, .055);
+  --gl-fill-hi: rgba(255, 255, 255, .1);
+  --gl-sheen: linear-gradient(165deg, rgba(255, 255, 255, .15) 0%, rgba(255, 255, 255, .04) 42%, rgba(255, 255, 255, 0) 66%);
+  --gl-rim: inset 0 1px 0 rgba(255, 255, 255, .26), inset 0 0 0 1px rgba(255, 255, 255, .08), inset 0 -1px 0 rgba(0, 0, 0, .4);
+  --gl-lift: 0 8px 18px -10px rgba(0, 0, 0, .65);
+  --gl-well: rgba(0, 0, 0, .32);
+  --gl-well-shadow: inset 0 1px 3px rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(255, 255, 255, .06), 0 1px 0 rgba(255, 255, 255, .05);
+  --gl-accent: color-mix(in srgb, var(--accent) 30%, rgba(24, 21, 18, .35));
+}
+
+/* ---------- raised glass controls ---------- */
+.chip, .icon-btn, .mini-btn, .sheet-btn, .fchip, .keys-chip, .card-key, .prev {
+  position: relative;
+  background: var(--gl-sheen), var(--gl-fill);
+  border-color: rgba(255, 255, 255, .1);
+  box-shadow: var(--gl-rim), var(--gl-lift);
+  transition: border-color .2s, color .2s, background .2s, box-shadow .25s, transform .2s var(--ease);
+}
+.prev { position: absolute; background: var(--gl-sheen), rgba(20, 18, 15, .6); }
+.chip:hover, .icon-btn:hover:not(:disabled), .mini-btn:hover, .sheet-btn:hover:not(:disabled), .fchip:hover, .keys-chip:hover, .card-key:hover, .prev:hover {
+  background: var(--gl-sheen), var(--gl-fill-hi);
+  border-color: rgba(255, 255, 255, .22);
+}
+.chip:active, .icon-btn:active:not(:disabled), .mini-btn:active, .sheet-btn:active:not(:disabled), .fchip:active, .card-key:active {
+  transform: scale(.97);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .06);
+}
+
+/* selected: accent glass with a glow, text stays light */
+.chip.on, .fchip.on {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 58%), var(--gl-accent);
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  box-shadow: var(--gl-rim), 0 0 22px -6px var(--accent-glow);
+}
+.sheet-btn.primary {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, .08) 46%, rgba(255, 255, 255, 0) 54%),
+    linear-gradient(180deg, color-mix(in srgb, var(--accent) 100%, white 12%), color-mix(in srgb, var(--accent) 84%, black));
+  border-color: color-mix(in srgb, var(--accent) 60%, black);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), inset 0 -10px 16px -10px rgba(0, 0, 0, .35), 0 12px 28px -12px var(--accent-glow);
+}
+.sheet-btn.primary:hover:not(:disabled) { filter: brightness(1.07); background-color: transparent; }
+.mini-btn.danger { background: var(--gl-sheen), rgba(255, 122, 107, .08); }
+
+/* voice cards and the provider button: lit rim + sheen over their panel fill */
+.vcard, .prov-btn { position: relative; box-shadow: var(--gl-rim), var(--gl-lift); background-image: var(--gl-sheen); }
+.vcard.on {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 60%);
+  background-color: color-mix(in srgb, var(--accent) 16%, rgba(20, 18, 15, .5));
+  box-shadow: var(--gl-rim), 0 0 26px -8px var(--accent-glow);
+}
+
+/* ---------- recessed inputs ---------- */
+.sel, .txt, .vid, .vsearch, .search, .key-input {
+  background: var(--gl-well);
+  border-color: rgba(255, 255, 255, .07);
+  box-shadow: var(--gl-well-shadow);
+}
+.key-input:focus-visible { outline: none; }
+.key-input:focus, .sel:focus, .txt:focus, .vsearch:focus, .search:focus { border-color: color-mix(in srgb, var(--accent) 65%, transparent); box-shadow: var(--gl-well-shadow), 0 0 0 3px var(--accent-ring); }
+
+/* toggle: recessed groove, glass bead */
+.sw { background: var(--gl-well); box-shadow: var(--gl-well-shadow); }
+.sw span { background: linear-gradient(180deg, #f7f2e9, #b9b2a6); box-shadow: 0 2px 6px rgba(0, 0, 0, .55), inset 0 1px 0 #fff; }
+.sw.on { background: linear-gradient(180deg, rgba(255, 255, 255, .3), rgba(255, 255, 255, 0) 60%), var(--accent); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35), 0 0 18px -4px var(--accent-glow); }
+.sw.on span { background: linear-gradient(180deg, #fff, #ebe5da); }
+
+/* slider: groove + glass bead */
+.rng { box-shadow: inset 0 1px 2px rgba(0, 0, 0, .55), 0 1px 0 rgba(255, 255, 255, .05); }
+.rng::-webkit-slider-thumb {
+  width: 20px; height: 20px; border: 0; border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #fff 0%, #e6dfd2 45%, #a8a094 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .65), 0 0 0 1px rgba(255, 255, 255, .45), inset 0 -2px 3px rgba(0, 0, 0, .25);
+}
+.rng::-moz-range-thumb {
+  width: 20px; height: 20px; border: 0; border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #fff 0%, #e6dfd2 45%, #a8a094 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .65), 0 0 0 1px rgba(255, 255, 255, .45);
+}
+
+/* toasts float over everything, so they can be real glass */
+.toast {
+  background: rgba(20, 18, 15, .62);
+  -webkit-backdrop-filter: var(--blur, blur(22px) saturate(1.5));
+  backdrop-filter: var(--blur, blur(22px) saturate(1.5));
+  border-color: rgba(255, 255, 255, .12);
+  box-shadow: var(--gl-rim), 0 28px 60px -20px rgba(0, 0, 0, .75);
+}
+.pitem:hover { background: rgba(255, 255, 255, .08); }
+.pitem.on { background: rgba(255, 255, 255, .11); }
+
+/* ---------- pointer light ---------- */
+/* keep this selector list in step with GLINT in src/lib/glass.ts */
+.chip, .icon-btn, .mini-btn, .sheet-btn, .fchip, .keys-chip, .card-key, .vcard, .prov-btn { --glint: radial-gradient(110px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, var(--hl, 0)), transparent 70%); }
+.output, .card, .sheet { --glint: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, var(--hl, 0)), transparent 70%); }
+.chip:hover, .icon-btn:hover, .mini-btn:hover, .sheet-btn:hover, .fchip:hover, .keys-chip:hover, .card-key:hover, .vcard:hover, .prov-btn:hover { --hl: .2; }
+.output:hover, .card:hover, .sheet:hover { --hl: .07; }
+.chip::after, .icon-btn::after, .mini-btn::after, .sheet-btn::after, .fchip::after, .keys-chip::after, .card-key::after, .vcard::after, .prov-btn::after,
+.output::after, .card::after, .sheet::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: var(--glint, none);
+}
+.output { position: relative; }
+
+/* ---------- edge refraction (Chromium; other browsers keep the blur) ---------- */
+/* keep this selector list in step with REFRACT in src/lib/glass.ts */
+.sheet, .toast {
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  backdrop-filter: blur(14px) var(--refract, saturate(1)) saturate(1.5);
+}
+/* these sit over the dots and wave lines, so blur less and let the rim bend them */
+.output, .card:not(.add) {
+  -webkit-backdrop-filter: blur(5px) saturate(1.6);
+  backdrop-filter: blur(5px) var(--refract, saturate(1)) saturate(1.6);
+}
+
+/* people who ask for less transparency get solid surfaces */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass: #141210; --glass-2: #171512; --blur: none; }
+  .sheet, .toast, .output, .card:not(.add), .rail, .header, .aside, .input-panel, .modes { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .toast { background: #1a1815; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip, .icon-btn, .mini-btn, .sheet-btn, .fchip, .keys-chip, .card-key, .prev { transition: none; }
+}
+
+/* the dashed "add a provider" card sits directly on the shader background; give it the same fill as its neighbours */
+.card.add { background: rgba(14, 12, 10, .4); }
+
+/* ---------- dropdown menus ---------- */
+/*
+ * A menu sits inside the blurred side panel, and a blur inside a blur only sees the panel's own controls,
+ * not the background. So menus are near-opaque glass: dark enough to read, with the same lit rim.
+ */
+.menu {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 40%), rgba(22, 19, 16, .96);
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow: var(--gl-rim), 0 28px 60px -18px rgba(0, 0, 0, .85), 0 0 0 1px rgba(0, 0, 0, .4);
+  z-index: 20;
+}
+.select { position: relative; }
+.select-btn {
+  width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px;
+  border-radius: 12px; border: 1px solid rgba(255, 255, 255, .07); background: var(--gl-well); box-shadow: var(--gl-well-shadow);
+  color: var(--ink); font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em; text-align: left;
+  transition: border-color .2s, box-shadow .2s;
+}
+.select-btn:hover { border-color: rgba(255, 255, 255, .18); }
+.select-btn[aria-expanded="true"] { border-color: color-mix(in srgb, var(--accent) 65%, transparent); box-shadow: var(--gl-well-shadow), 0 0 0 3px var(--accent-ring); }
+.select-btn:focus-visible { outline: none; border-color: color-mix(in srgb, var(--accent) 65%, transparent); box-shadow: var(--gl-well-shadow), 0 0 0 3px var(--accent-ring); }
+.select-chev { display: flex; color: var(--ink-3); transition: transform .3s var(--ease); flex-shrink: 0; }
+.select .menu { position: absolute; top: calc(100% + 8px); left: 0; right: 0; max-height: 280px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line-3) transparent; }
+.menu-opt {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 40px; padding: 0 12px; border-radius: 10px;
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em; color: var(--ink-3); cursor: pointer;
+}
+.menu-opt.active { background: rgba(255, 255, 255, .09); color: var(--ink); }
+.menu-opt.on { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .select-chev { transition: none; } }

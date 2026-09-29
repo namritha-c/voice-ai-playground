@@ -84,17 +84,10 @@ export function Orb({ t, energy, progress, level, phaseLabel, title, sub, accent
             <stop offset="100%" stopColor="#0C0B0A" stopOpacity="0" />
           </radialGradient>
         </defs>
-        <g className="spin"><circle r="192" fill="none" stroke="#35312C" strokeWidth="7" strokeDasharray="1 9.05" /></g>
-        <g className="spin rev"><circle r="180" fill="none" stroke="#2A2723" strokeWidth="1" strokeDasharray="46 10 4 10" /></g>
-        <circle r="168" fill="none" stroke="#221F1C" strokeWidth="2" />
         <circle r="168" fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="1055.6"
           strokeDashoffset={(1055.6 * (1 - progress)).toFixed(1)} transform="rotate(-90)" />
         <g className="spin fast" opacity={busy ? 1 : 0}><circle r="168" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeDasharray="90 966" /></g>
         <circle r="118" fill="url(#orbcore)" />
-        <circle r="58" fill="none" stroke="#F2EDE4" strokeOpacity="0.08" strokeDasharray="2 4" />
-        <g className="orbit"><circle cx="0" cy="-150" r="3.5" fill="var(--accent)" /></g>
-        <g className="orbit o2"><circle cx="0" cy="138" r="2.2" fill="#F2EDE4" /></g>
-        <g className="orbit o3"><circle cx="158" cy="0" r="1.6" fill="#F2EDE4" fillOpacity="0.6" /></g>
       </svg>
       <OrbCore accent={accent} energy={energy} />
       <OrbGL signal={signal} color={accent} />

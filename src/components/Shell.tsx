@@ -3,9 +3,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { Mode } from '../api/client';
 import { level } from '../lib/audio';
+import { startGlass } from '../lib/glass';
 import { useClock } from '../lib/useClock';
 import Header from './Header';
 import { KeySheetProvider } from './KeySheet';
@@ -40,6 +41,7 @@ function Chrome({ children }: { children: ReactNode }) {
   const path = usePathname();
   const t = useClock(20);
   const mode = (path.match(/^\/(tts|stt|sts)/)?.[1] as Mode | undefined) ?? null;
+  useEffect(() => startGlass(), []);
   return (
     <div className={`app mode-${mode ?? 'tts'}`}>
       <Aurora mode={mode} />
