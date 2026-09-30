@@ -1,17 +1,21 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { api, type Mode } from '../api/client';
 import { ACCENTS } from '../lib/anim';
+import { useGo } from '../lib/nav';
 import LiquidWord from './LiquidWord';
+import NavLink from './NavLink';
 import { useProviders } from '../state/useProviders';
 
 const TABS: [Mode, string, string][] = [['tts', 'Text to Speech', 'TTS'], ['stt', 'Speech to Text', 'STT'], ['sts', 'Speech to Speech', 'STS']];
 
 export default function Header({ mode }: { mode: Mode | null }) {
   const router = useRouter();
+  const go = useGo();
+  useEffect(() => { TABS.forEach(([m]) => router.prefetch(`/${m}`)); }, [router]);
   const idx = mode ? TABS.findIndex((x) => x[0] === mode) : 0;
   const health = useQuery({ queryKey: ['health'], queryFn: api.health, refetchInterval: 15000, retry: false });
   const { data: providers } = useProviders();
@@ -25,7 +29,7 @@ export default function Header({ mode }: { mode: Mode | null }) {
       <div role="tablist" aria-label="Mode" className={`modes${mode ? '' : ' none'}`}>
         <div aria-hidden="true" className="pill" style={{ transform: `translateX(${idx * 176}px)` }} />
         {TABS.map(([m, label, abbr]) => (
-          <button key={m} role="tab" aria-selected={m === mode} className={`tab${m === mode ? ' on' : ''}`} onClick={() => router.push(`/${m}`)}>
+          <button key={m} role="tab" aria-selected={m === mode} className={`tab${m === mode ? ' on' : ''}`} onClick={() => go(`/${m}`)}>
             <span>{label}</span><span className="abbr">{abbr}</span>
           </button>
         ))}
@@ -36,10 +40,10 @@ export default function Header({ mode }: { mode: Mode | null }) {
             <span className="dot" style={{ background: 'var(--danger)' }} />API OFFLINE
           </span>
         ) : (
-          <Link href="/providers" className="keys-chip" title="Your API keys stay in this browser">
+          <NavLink href="/providers" className="keys-chip" title="Your API keys stay in this browser">
             <span className="dot" style={{ background: held ? 'var(--stt)' : 'var(--accent)' }} />
             {held ? `${held} of ${providers.length} keys added` : 'Add API keys'}
-          </Link>
+          </NavLink>
         )}
       </div>
     </header>

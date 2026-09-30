@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { MODES, type Mode } from '../api/client';
 import { IconKey, IconSearch } from '../components/Icons';
 import { useKeySheet } from '../components/KeySheet';
 import { CAP_STYLE, fvs } from '../lib/anim';
+import { useGo } from '../lib/nav';
 import { useClock } from '../lib/useClock';
 import { keys, maskKey } from '../state/keys';
 import { actions } from '../state/playground';
@@ -39,7 +39,7 @@ export function PageBackdrop() {
 }
 
 export default function Providers() {
-  const router = useRouter();
+  const go = useGo();
   const t = useClock(20);
   const [f, setF] = useState<Mode | 'all'>('all');
   const [q, setQ] = useState('');
@@ -52,7 +52,7 @@ export default function Providers() {
     if (!connected) return sheet.open(pid);
     const m = f !== 'all' && caps.includes(f) ? f : caps[0];
     actions.provider(m, pid);
-    router.push(`/${m}`);
+    go(`/${m}`);
   };
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import * as THREE from 'three';
 
@@ -9,9 +9,11 @@ export interface OrbSignal { energy: 'idle' | 'busy' | 'live'; level: number }
 const DOTS = 2200;
 const RADIUS = 0.78;
 const CAM_Z = 5;
+/** Colour ease rate per second, tuned to finish with the 0.9s CSS transition on `.app`. */
+const MORPH_RATE = 4.5;
 
 const VERT = /* glsl */ `
-uniform float uTime, uLevel, uBusy, uPx;
+uniform float uTime, uLevel, uBusy, uPx, uPulse;
 attribute float aSeed;
 varying float vFront, vHot, vCenter;
 
@@ -26,7 +28,7 @@ void main() {
   vec3 n = normalize(position);
   float slow = noise(n * 1.8 + vec3(0.0, uTime * 0.35, uTime * 0.2));
   float fine = noise(n * 4.5 - uTime * 0.7);
-  float amp = 0.045 + 0.34 * uLevel + 0.05 * uBusy;
+  float amp = 0.045 + 0.34 * uLevel + 0.05 * uBusy + 0.16 * uPulse;
   float disp = (slow - 0.5) * 2.0 * amp + (fine - 0.5) * amp * 0.8;
   // while a request runs, a bright band travels pole to pole
   float scan = exp(-pow((n.y - sin(uTime * 1.7) * 0.92) * 4.5, 2.0)) * uBusy;
@@ -36,11 +38,11 @@ void main() {
   gl_Position = projectionMatrix * mv;
 
   vFront = 1.0 - clamp((-mv.z - ${(CAM_Z - RADIUS - 0.3).toFixed(2)}) / ${(2 * RADIUS + 0.6).toFixed(2)}, 0.0, 1.0);
-  vHot = clamp(scan + uLevel * smoothstep(0.55, 1.0, slow), 0.0, 1.0);
+  vHot = clamp(scan + uLevel * smoothstep(0.55, 1.0, slow) + uPulse * 0.7, 0.0, 1.0);
   // leave the middle of the front face quiet so the voice name stays readable
   float r = length(gl_Position.xy / gl_Position.w);
   vCenter = mix(1.0, 0.12 + 0.88 * smoothstep(0.10, 0.34, r), smoothstep(0.35, 0.7, vFront));
-  gl_PointSize = uPx * (0.8 + 1.1 * aSeed) * (1.0 + scan * 1.4 + uLevel * 0.7) * (${CAM_Z.toFixed(1)} / -mv.z);
+  gl_PointSize = uPx * (0.8 + 1.1 * aSeed) * (1.0 + scan * 1.4 + uLevel * 0.7 + uPulse * 0.9) * (${CAM_Z.toFixed(1)} / -mv.z);
 }`;
 
 const FRAG = /* glsl */ `
@@ -68,15 +70,24 @@ function lattice(n: number) {
   return { pos, seed };
 }
 
-function Dots({ signal, color }: { signal: RefObject<OrbSignal>; color: string }) {
+function Dots({ signal, color, still }: { signal: RefObject<OrbSignal>; color: string; still: boolean }) {
   const group = useRef<THREE.Group>(null);
   const mat = useRef<THREE.ShaderMaterial>(null);
   const geo = useMemo(() => lattice(DOTS), []);
   const uniforms = useMemo(() => ({
-    uTime: { value: 0 }, uLevel: { value: 0 }, uBusy: { value: 0 }, uPx: { value: 2 }, uColor: { value: new THREE.Color(color) },
+    uTime: { value: 0 }, uLevel: { value: 0 }, uBusy: { value: 0 }, uPulse: { value: 0 }, uPx: { value: 2 }, uColor: { value: new THREE.Color(color) },
   }), []); // eslint-disable-line react-hooks/exhaustive-deps -- color is applied in the effect below
 
-  useEffect(() => { uniforms.uColor.value.set(color); }, [color, uniforms]);
+  // A new colour is a target the frame loop eases toward, and it kicks off a swell that decays on its own.
+  const target = useMemo(() => new THREE.Color(color), []); // eslint-disable-line react-hooks/exhaustive-deps -- retargeted in the effect below
+  const shown = useRef(color);
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    if (shown.current === color) return;
+    shown.current = color;
+    target.set(color);
+    if (still) { uniforms.uColor.value.copy(target); invalidate(); } else uniforms.uPulse.value = 1;
+  }, [color, still, target, uniforms, invalidate]);
 
   const smooth = useRef({ level: 0, busy: 0 });
   useFrame((state, dt) => {
@@ -87,8 +98,10 @@ function Dots({ signal, color }: { signal: RefObject<OrbSignal>; color: string }
     u.uTime.value += dt * (1 + 1.6 * smooth.current.level + 0.8 * smooth.current.busy);
     u.uLevel.value = smooth.current.level;
     u.uBusy.value = smooth.current.busy;
+    u.uColor.value.lerp(target, 1 - Math.exp(-dt * MORPH_RATE));
+    u.uPulse.value *= Math.exp(-dt * 2.6);
     u.uPx.value = state.gl.getPixelRatio() * 2.1;
-    group.current!.rotation.y += dt * (0.12 + 0.5 * smooth.current.level + 0.35 * smooth.current.busy);
+    group.current!.rotation.y += dt * (0.12 + 0.5 * smooth.current.level + 0.35 * smooth.current.busy + 1.2 * u.uPulse.value);
     group.current!.rotation.x = 0.28;
   });
 
@@ -119,7 +132,7 @@ export default function OrbGL({ signal, color, paused }: { signal: RefObject<Orb
   return (
     <Canvas className="orb-gl" aria-hidden="true" dpr={[1, 2]} frameloop={paused ? 'never' : still ? 'demand' : 'always'}
       camera={{ position: [0, 0, CAM_Z], fov: 35 }} gl={{ alpha: true, antialias: false, powerPreference: 'low-power' }}>
-      <Dots signal={signal} color={color} />
+      <Dots signal={signal} color={color} still={still} />
     </Canvas>
   );
 }

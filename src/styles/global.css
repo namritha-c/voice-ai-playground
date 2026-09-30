@@ -37,6 +37,20 @@
   --blur: blur(22px) saturate(1.5);
   color-scheme: dark;
 }
+/*
+ * Registered as colours so a mode switch eases every var(--accent) in the app, not just the tint layers.
+ * The orb's shader eases toward the same colour in OrbGL (MORPH_RATE), so the two finish together.
+ */
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #FF6A2B; }
+@property --accent-ring { syntax: '<color>'; inherits: true; initial-value: rgba(255, 106, 43, 0.14); }
+@property --accent-glow { syntax: '<color>'; inherits: true; initial-value: rgba(255, 106, 43, .42); }
+@property --tint-a { syntax: '<color>'; inherits: true; initial-value: #ff5a1f; }
+@property --tint-b { syntax: '<color>'; inherits: true; initial-value: #ffa25e; }
+.app { transition: --accent .9s cubic-bezier(.4, 0, .2, 1), --accent-ring .9s cubic-bezier(.4, 0, .2, 1), --accent-glow .9s cubic-bezier(.4, 0, .2, 1), --tint-a .9s cubic-bezier(.4, 0, .2, 1), --tint-b .9s cubic-bezier(.4, 0, .2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .main > :not(.backdrop), .aside { animation: none; }
+  .app { transition: none; }
+}
 .mode-tts { --accent: var(--tts); --accent-ring: rgba(255, 106, 43, 0.14); --accent-glow: rgba(255, 106, 43, .42); --tint-a: #ff5a1f; --tint-b: #ffa25e; }
 .mode-stt { --accent: var(--stt); --accent-ring: rgba(166, 227, 90, 0.14); --accent-glow: rgba(166, 227, 90, .36); --tint-a: #8fd63a; --tint-b: #2fd08a; }
 .mode-sts { --accent: var(--sts); --accent-ring: rgba(185, 162, 255, 0.14); --accent-glow: rgba(185, 162, 255, .4); --tint-a: #a58bff; --tint-b: #6a7bff; }
@@ -455,6 +469,24 @@ button.card:hover, a.card:hover, .card.link:hover, .card.link:focus-within { bor
 @keyframes rise { 0% { opacity: 0; transform: translateY(10px); filter: blur(4px); } 100% { opacity: 1; transform: none; filter: none; } }
 @keyframes pop { 0% { opacity: 0; transform: translateY(-6px) scale(.98); } 100% { opacity: 1; transform: none; } }
 @keyframes cardIn { 0% { opacity: 0; translate: 0 16px; filter: blur(6px); } 100% { opacity: 1; translate: 0 0; filter: none; } }
+@keyframes pageIn { 0% { opacity: 0; transform: translate3d(var(--enter-x, 0), 14px, 0); } 100% { opacity: 1; transform: none; } }
+
+/*
+ * Page transitions. The outgoing page fades and slides away (useGo in lib/nav.ts sets data-leaving and --exit-x),
+ * then each section of the incoming page rises in, staggered, from the side the tab strip moved toward (data-dir).
+ * Sections animate on their own, not inside one wrapper: opacity or a filter on an ancestor would cut the glass
+ * panels off from what they blur. `backwards` fill keeps the resting styles (hover transforms, etc.) after the entrance.
+ */
+.app[data-dir='1'] { --enter-x: 36px; }
+.app[data-dir='-1'] { --enter-x: -36px; }
+.main > :not(.backdrop), .aside { animation: pageIn .75s var(--ease) backwards; }
+.main > :nth-child(3) { animation-delay: .07s; }
+.main > :nth-child(n+4) { animation-delay: .14s; }
+.aside { animation-delay: .1s; }
+.app[data-leaving] .main > :not(.backdrop), .app[data-leaving] .aside, .app[data-leaving] .page > :not(svg) {
+  opacity: 0; transform: translate3d(var(--exit-x, 0), 0, 0); pointer-events: none;
+  transition: opacity .18s ease-in, transform .18s ease-in;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .ch, .wd, .fade, .pop, .card, .sheet[open], .aurora { animation: none; }

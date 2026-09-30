@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Link from 'next/link';
+import NavLink from '../NavLink';
 import type { Mode, Provider } from '../../api/client';
 import { IconArrowUpRight, IconChevron } from '../Icons';
 import Menu from './Menu';
@@ -43,10 +43,10 @@ export default function ProviderPicker({ mode, providers, current, onPick }: {
             );
           })}
           <div style={{ height: 1, background: 'var(--line-2)', margin: '4px 8px' }} />
-          <Link className="pitem" href="/providers" style={{ height: 44, color: 'var(--ink-3)' }}>
+          <NavLink className="pitem" href="/providers" style={{ height: 44, color: 'var(--ink-3)' }}>
             <span style={{ marginLeft: 10, display: 'flex' }}><IconArrowUpRight /></span>
             <span style={{ fontSize: 13 }}>All providers</span>
-          </Link>
+          </NavLink>
         </div>
       </Menu>
     </div>
