@@ -129,8 +129,9 @@ export default function OrbGL({ signal, color, paused }: { signal: RefObject<Orb
     mq.addEventListener('change', sync);
     return () => mq.removeEventListener('change', sync);
   }, []);
+  // offsetSize: size the canvas from layout, not the on-screen box, which the orb's CSS scale() already shrinks.
   return (
-    <Canvas className="orb-gl" aria-hidden="true" dpr={[1, 2]} frameloop={paused ? 'never' : still ? 'demand' : 'always'}
+    <Canvas className="orb-gl" aria-hidden="true" dpr={[1, 2]} resize={{ offsetSize: true }} frameloop={paused ? 'never' : still ? 'demand' : 'always'}
       camera={{ position: [0, 0, CAM_Z], fov: 35 }} gl={{ alpha: true, antialias: false, powerPreference: 'low-power' }}>
       <Dots signal={signal} color={color} still={still} />
     </Canvas>

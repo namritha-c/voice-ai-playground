@@ -45,7 +45,7 @@
   .brand .word .liquid-stack { height: 30px !important; width: 118px !important; }
   .brand .word .liquid-word > .serif { font-size: 22px !important; }
   .header-right { flex: 0 0 auto; }
-  .header-right .keys-chip { font-size: 0; gap: 0; padding: 0; width: 34px; justify-content: center; }
+  .header-right .keys-chip { display: none; }
   .header-right .api-state { font-size: 0; gap: 0; }
   .modes.none { display: none; }
 
