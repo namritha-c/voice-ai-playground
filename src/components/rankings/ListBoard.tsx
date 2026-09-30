@@ -59,7 +59,7 @@ function Row({ e, group, i }: { e: ListEntry; group: ListGroup; i: number }) {
       <span className="rk-rank serif">{e.rank ?? '–'}</span>
       <div className="rk-who">
         <div className="rk-who-head">
-          <ProviderTile name={e.by} />
+          <ProviderTile names={[e.by, e.name]} />
           <div style={{ minWidth: 0 }}>
             <div className="rk-name">{e.name}</div>
             <div className="rk-by"><span>{e.by}</span>{e.kind && <Tag>{e.kind}</Tag>}</div>
@@ -90,6 +90,11 @@ export default function ListBoard({ board }: { board: Board }) {
           <div className="rk-board-head">
             <div><span className="rk-k mono">{g.title}</span>{g.blurb && <span className="rk-scale">{g.blurb}</span>}</div>
             {g.axis && <span className="rk-dir mono">{g.axis.label}</span>}
+          </div>
+          <div className="rk-cols list mono" aria-hidden="true">
+            <span>Rank</span>
+            <span>Model</span>
+            {g.col ? <span className="rk-col-metric"><b>{g.col.label}</b>{g.col.source && <em>{g.col.source}</em>}</span> : <span />}
           </div>
           {g.axis && (
             <div className="rk-axis list" aria-hidden="true">

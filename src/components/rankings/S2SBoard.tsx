@@ -85,7 +85,7 @@ function Detail({ e, lead }: { e: S2SEntry; lead: Leaders }) {
   return (
     <div className="rk-panel rk-detail">
       <div className="rk-detail-head">
-        <ProviderTile name={e.provider} size={44} />
+        <ProviderTile names={[e.provider]} size={44} />
         <div style={{ minWidth: 0 }}>
           <div className="rk-detail-name serif">{e.model}</div>
           <div className="rk-by"><span>{e.provider}</span>{e.tag && <Tag>{e.tag}</Tag>}</div>
@@ -160,7 +160,11 @@ export default function S2SBoard({ board }: { board: Board }) {
           <span className="rk-dir mono">accent = best in column</span>
         </div>
         <div className="rk-s2s-cols mono" aria-hidden="true">
-          <span>Rank</span><span>Model</span><span>Index</span><span>Reasoning</span><span>Full-duplex</span><span>Time to audio</span>
+          <span>Rank</span><span>Model</span>
+          <span><b>Index</b><em>AA S2S index</em></span>
+          <span><b>Reasoning</b><em>Big Bench Audio</em></span>
+          <span><b>Full-duplex</b><em>Full Duplex Bench</em></span>
+          <span><b>Time to audio</b><em>TTFA</em></span>
         </div>
         <div className="rk-rows" role="list">
           {board.entries.map((e, i) => (
@@ -168,7 +172,7 @@ export default function S2SBoard({ board }: { board: Board }) {
               style={{ '--i': i } as React.CSSProperties} onClick={() => setSel(e)} aria-pressed={sel.model === e.model}>
               <span className="rk-rank serif">{e.rank ?? '–'}</span>
               <span className="rk-who-head">
-                <ProviderTile name={e.provider} size={34} />
+                <ProviderTile names={[e.provider]} size={34} />
                 <span style={{ minWidth: 0, textAlign: 'left' }}>
                   <span className="rk-name">{e.model}</span>
                   <span className="rk-by"><span>{e.provider}</span>{e.tag && <Tag>{e.tag}</Tag>}</span>

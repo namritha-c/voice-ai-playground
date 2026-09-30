@@ -5,7 +5,8 @@ import type { Metric, Try } from '../../data/rankings';
 import { useGo } from '../../lib/nav';
 import { actions } from '../../state/playground';
 import { useProviders } from '../../state/useProviders';
-import { IconArrowUpRight } from '../Icons';
+import { LOGOS } from '../../data/logos';
+import { IconArrowUpRight, IconWave } from '../Icons';
 
 export const stillNow = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -32,9 +33,24 @@ export const along = (v: number, [a, b]: [number, number]) => Math.max(0, Math.m
 
 export const fmtMetric = (m: Metric, v: number) => `${v.toLocaleString('en-US', { minimumFractionDigits: m.decimals, maximumFractionDigits: m.decimals, useGrouping: false })}${m.unit}`;
 
-export const ProviderTile = ({ name, size = 40 }: { name: string; size?: number }) => (
-  <span className="mono-tile rk-tile" aria-hidden="true" style={{ width: size, height: size, fontSize: size * 0.46 }}>{name.trim()[0]?.toUpperCase()}</span>
-);
+/** The provider's own icon, matched by the first name that starts with a known key. Providers without one get a neutral waveform. */
+const logoOf = (names: string[]) => {
+  for (const n of names) {
+    const l = n.toLowerCase();
+    const k = Object.keys(LOGOS).find((key) => l.startsWith(key));
+    if (k) return `/logos/${LOGOS[k]}`;
+  }
+  return null;
+};
+
+export function ProviderTile({ names, size = 40 }: { names: string[]; size?: number }) {
+  const src = logoOf(names);
+  return (
+    <span className={`rk-tile${src ? '' : ' none'}`} aria-hidden="true" style={{ width: size, height: size }}>
+      {src ? <img src={src} alt="" loading="lazy" draggable={false} /> : <IconWave size={Math.round(size * 0.46)} />}
+    </span>
+  );
+}
 
 export const Warn = ({ children }: { children: ReactNode }) => (
   <p className="rk-flag">

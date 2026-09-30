@@ -18,7 +18,7 @@ function Podium({ board }: { board: Board }) {
         return (
           <div key={e.model} role="listitem" className={`rk-pod p${i + 1}`} style={{ '--h': `${STAND[i]}px`, '--d': `${0.15 + i * 0.12}s` } as React.CSSProperties}>
             <div className="rk-pod-top">
-              <ProviderTile name={e.provider} size={38} />
+              <ProviderTile names={[e.provider]} size={38} />
               <span className="rk-pod-name">{e.model}</span>
               <span className="rk-pod-by">{e.provider}</span>
               <span className="rk-pod-val serif"><Num value={e.value} decimals={metric.decimals} /><i>{metric.unit}</i></span>
@@ -40,7 +40,7 @@ function Row({ e, board, i }: { e: ScoreEntry; board: Board; i: number }) {
       <span className="rk-rank serif">{e.rank ?? '–'}</span>
       <div className="rk-who">
         <div className="rk-who-head">
-          <ProviderTile name={e.provider} />
+          <ProviderTile names={[e.provider]} />
           <div style={{ minWidth: 0 }}>
             <div className="rk-name">{e.model}</div>
             <div className="rk-by">
@@ -63,7 +63,7 @@ function Row({ e, board, i }: { e: ScoreEntry; board: Board; i: number }) {
 
 export default function ScoreBoard({ board }: { board: Board }) {
   const { metric, entries } = board;
-  const arrow = metric.better === 'lower' ? '← lower is better' : 'higher is better →';
+  const arrow = metric.better === 'lower' ? 'lower is better ←' : 'higher is better →';
   let ranked = 0;
   return (
     <>
@@ -76,12 +76,11 @@ export default function ScoreBoard({ board }: { board: Board }) {
       </div>
 
       <div className="rk-panel rk-board">
-        <div className="rk-board-head">
-          <div>
-            <span className="rk-k mono">{metric.label}</span>
-            <span className="rk-scale">{metric.scale}</span>
-          </div>
-          <span className="rk-dir mono">{arrow}</span>
+        <div className="rk-cols mono" aria-hidden="true">
+          <span>Rank</span>
+          <span>Model</span>
+          <span className="rk-col-metric"><b>{metric.label}</b><em>{metric.source} · {arrow}</em></span>
+          <span>{metric.short}</span>
         </div>
         <div className="rk-axis" aria-hidden="true">
           <span />

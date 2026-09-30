@@ -33,6 +33,10 @@ export interface Metric {
   ticks: number[];
   decimals: number;
   scale: string;
+  /** Column header over the score, e.g. WER. */
+  short: string;
+  /** The benchmark's short name, printed in the column header. */
+  source: string;
 }
 
 export interface Terms { term: string; def: string }
@@ -95,6 +99,8 @@ export interface ListEntry {
 export interface ListGroup {
   title: string;
   blurb?: string;
+  /** Header over the right-hand column, so each list says what its numbers are. */
+  col?: { label: string; source?: string };
   /** A shared axis for `range` rows in this group. */
   axis?: { domain: [number, number]; ticks: number[]; label: string; fmt: (n: number) => string };
   entries: ListEntry[];
@@ -121,8 +127,8 @@ export interface Category {
   terms: Terms[];
 }
 
-const WER: Metric = { label: 'Word error rate', unit: '%', better: 'lower', domain: [0, 6], ticks: [0, 2, 4, 6], decimals: 1, scale: 'Artificial Analysis' };
-const ELO: Metric = { label: 'Arena Elo', unit: '', better: 'higher', domain: [900, 1300], ticks: [1000, 1100, 1200, 1300], decimals: 0, scale: 'Artificial Analysis Speech Arena' };
+const WER: Metric = { label: 'Word error rate', unit: '%', better: 'lower', domain: [0, 6], ticks: [0, 2, 4, 6], decimals: 1, scale: 'Artificial Analysis', short: 'WER', source: 'Artificial Analysis' };
+const ELO: Metric = { label: 'Arena Elo', unit: '', better: 'higher', domain: [900, 1300], ticks: [1000, 1100, 1200, 1300], decimals: 0, scale: 'Artificial Analysis Speech Arena', short: 'Elo', source: 'AA Speech Arena' };
 
 export const CATEGORIES: Category[] = [
   {
@@ -148,7 +154,7 @@ export const CATEGORIES: Category[] = [
       },
       {
         id: 'stt-open', kind: 'score', label: 'Open weights', podium: true,
-        metric: { label: 'Mean word error rate', unit: '%', better: 'lower', domain: [0, 7], ticks: [0, 2, 4, 6], decimals: 2, scale: 'Hugging Face Open ASR leaderboard' },
+        metric: { label: 'Mean word error rate', unit: '%', better: 'lower', domain: [0, 7], ticks: [0, 2, 4, 6], decimals: 2, scale: 'Hugging Face Open ASR leaderboard', short: 'WER', source: 'Hugging Face Open ASR' },
         takeaway: 'The top four sit within 0.43 points of each other. Pick on speed, licence and language.',
         important: 'AA WER and Hugging Face WER use different test audio. Do not compare numbers across the two boards.',
         entries: [
@@ -302,7 +308,7 @@ export const CATEGORIES: Category[] = [
             ],
           },
           {
-            title: 'Turn detection', blurb: 'Says whether the speaker finished a thought, not only paused.',
+            title: 'Turn detection', blurb: 'Says whether the speaker finished a thought, not only paused.', col: { label: 'Headline claim' },
             entries: [
               { rank: 1, name: 'Smart Turn v3.2', by: 'Pipecat / Daily', kind: 'Turn', facts: [['Size', 'About 8M parameters'], ['Languages', '23'], ['CPU', '10 ms to under 100 ms, by CPU type'], ['Licence', 'BSD-2']] },
               { rank: 2, name: 'LiveKit Turn Detector', by: 'LiveKit', kind: 'Turn', note: 'Transformer end-of-turn model. “Adaptive” is a separate feature: Adaptive Interruption Handling (Mar 2026).', facts: [['Licence', 'LiveKit Model License']] },
@@ -329,7 +335,7 @@ export const CATEGORIES: Category[] = [
         important: 'Striped bars are vendor-reported. The company tested its own product. Treat them with care until someone else confirms them.',
         groups: [
           {
-            title: 'Ranked', blurb: 'Bars show how far the model cut transcription errors.',
+            title: 'Ranked', blurb: 'Bars show how far the model cut transcription errors.', col: { label: 'WER reduction', source: 'Vendor-reported' },
             entries: [
               { rank: 1, name: 'Krisp Voice Isolation 2.5 (Server SDK)', by: 'Krisp', kind: 'Commercial', note: 'Removes noise and other voices.', flag: 'These numbers are for Voice Isolation 2.5, not the older NC/BVC models.', meters: [{ label: 'WER cut, average', pct: 46, vendor: true }, { label: 'With background speech', pct: 70, vendor: true }] },
               { rank: 2, name: 'Voice Focus 2.2', by: 'ai-coustics', kind: 'Commercial', note: 'Tuned for machines (STT), not human ears. S version is 10x smaller than v2.0.', meters: [{ label: 'WER cut, up to about 80–84%', pct: 84, vendor: true }] },
@@ -366,7 +372,7 @@ export const CATEGORIES: Category[] = [
         changed: 'Precision-2 replaced by Precision-3.',
         groups: [
           {
-            title: 'Ranked',
+            title: 'Ranked', col: { label: 'Diarization error rate (DER)', source: 'Test set differs per row' },
             entries: [
               { rank: 1, name: 'Precision-3', by: 'pyannoteAI (commercial)', kind: 'Commercial', note: 'New. Replaces Precision-2.', flag: 'Default from 1 Oct 2026. Precision-2 is deprecated on 15 Oct.', hero: { v: '14.35%', k: 'DER, 15-set avg' } },
               { rank: 2, name: 'DiariZen', by: 'BUT (open)', kind: 'Open', note: 'Strong open option.', flag: 'Weights are non-commercial (CC BY-NC 4.0).', hero: { v: '~13.3%', k: 'DER, 4-set avg' } },
@@ -374,7 +380,7 @@ export const CATEGORIES: Category[] = [
             ],
           },
           {
-            title: 'Also on the list', blurb: 'No shared score.',
+            title: 'Also on the list', blurb: 'No shared score.', col: { label: 'DER', source: 'Vendor claim' },
             entries: [
               { rank: null, name: 'Streaming Sortformer v2', by: 'NVIDIA NeMo', kind: 'Streaming', note: 'Streaming, chunks as small as 0.32 s. Max 4 speakers. Mostly English.' },
               { rank: null, name: 'Falcon', by: 'Picovoice', kind: 'On-device', note: 'Close to pyannote accuracy with 221x less compute and 15x less memory.', flag: 'Vendor claim.', hero: { v: '10.3%', k: 'DER on VoxConverse' } },
@@ -400,7 +406,7 @@ export const CATEGORIES: Category[] = [
         changed: 'Vapi $0.30/min was a third-party high estimate. Vapi’s own estimate is $0.08–0.13/min.',
         groups: [
           {
-            title: 'Managed', blurb: 'The vendor hosts everything. Faster to start, less control.',
+            title: 'Managed', blurb: 'The vendor hosts everything. Faster to start, less control.', col: { label: 'Price per minute' },
             axis: { domain: [0, 0.35], ticks: [0.1, 0.2, 0.3], label: 'Price per minute', fmt: (n) => `$${n.toFixed(2)}` },
             entries: [
               { rank: null, name: 'Retell AI', by: 'Managed', note: 'Contact centres and outbound calls.', flag: 'HIPAA BAA: sources conflict (pricing page says Enterprise only).', range: { min: 0.07, max: 0.31, label: '$0.07–0.31 / min' } },
@@ -409,14 +415,14 @@ export const CATEGORIES: Category[] = [
             ],
           },
           {
-            title: 'Open source', blurb: 'You host it. You control it.',
+            title: 'Open source', blurb: 'You host it. You control it.', col: { label: 'Licence' },
             entries: [
               { rank: null, name: 'LiveKit Agents', by: 'Apache-2.0', kind: 'Self-host', note: 'Control at the infrastructure level over WebRTC. MCP tools built in.', hero: { v: 'Self-host', k: 'Apache-2.0' } },
               { rank: null, name: 'Pipecat', by: 'BSD-2, Daily', kind: 'Self-host', note: 'Control at the pipeline level to tune latency and quality.', hero: { v: 'Self-host', k: 'BSD-2' } },
             ],
           },
           {
-            title: 'Model APIs', blurb: 'Native speech to speech. No separate STT and TTS.',
+            title: 'Model APIs', blurb: 'Native speech to speech. No separate STT and TTS.', col: { label: 'Billing' },
             entries: [
               { rank: null, name: 'OpenAI Realtime, Gemini Live, Bedrock Nova Sonic', by: 'Model APIs', kind: 'Per token', note: 'Native speech-to-speech. No separate STT and TTS.', hero: { v: 'Per token', k: 'billing' } },
             ],
