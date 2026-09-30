@@ -1,0 +1,96 @@
+/*
+ * Providers page + shared overlays (key sheet, toast, dropdown menus) on tablet and phone.
+ * Breakpoints follow shell.css: tablet max-width 1179px, phone max-width 767px.
+ */
+
+/* Providers header row. These base rules are the old inline styles, moved here so the queries below can
+   reach them. Desktop output is unchanged. */
+.pv-head { position: relative; display: flex; align-items: flex-end; gap: 20px; }
+.pv-count { display: flex; flex-direction: column; gap: 4px; padding-bottom: 16px; }
+.pv-spacer { flex-grow: 1; }
+.pv-search { position: relative; width: 280px; padding-bottom: 12px; }
+.pv-chips { position: relative; display: flex; gap: 8px; margin-top: 30px; }
+
+/* ---------- tablet ---------- */
+@media (max-width: 1179px) {
+  .pv-head { flex-wrap: wrap; row-gap: 8px; }
+  .pv-chips { flex-wrap: wrap; }
+  .pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* the search drops to its own full-width row once the title needs the space */
+@media (max-width: 999px) {
+  .pv-spacer { display: none; }
+  .pv-search { flex: 1 0 100%; width: auto; padding-bottom: 0; margin-top: 16px; }
+}
+
+/* touch screens get finger-sized menu rows */
+@media (max-width: 1179px) and (pointer: coarse), (max-width: 767px) {
+  .menu-opt { height: 44px; font-size: 13px; }
+  .menu { padding: 6px; border-radius: 18px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 767px) {
+  /* title and count share a line, search takes the next one */
+  .pv-head { gap: 14px; }
+  .pv-count { padding-bottom: 8px; }
+  .pv-count .serif { font-size: 24px !important; }
+  .pv-count .mono { font-size: 10px !important; }
+  .pv-search { margin-top: 18px; }
+
+  /* filters: one swipeable strip that runs to the screen edges */
+  .pv-chips {
+    flex: 0 0 auto; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; margin: 22px -16px 0; padding: 2px 16px 4px; scroll-snap-type: x proximity; scroll-padding-inline: 16px;
+    scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 24px), transparent);
+  }
+  .pv-chips::-webkit-scrollbar { display: none; }
+  .pv-chips .fchip { flex-shrink: 0; white-space: nowrap; height: 40px; scroll-snap-align: start; }
+
+  .pgrid { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 20px; }
+  .pgrid .card { height: auto; min-height: 176px; padding: 18px 18px 16px; border-radius: 20px; }
+  .pgrid .card .nm { margin-top: auto; padding-top: 28px; }
+  .pgrid .card-key { height: 36px; padding: 0 14px; }
+  .pgrid .card.add { min-height: 0; gap: 18px; }
+  .page-note { margin-top: 22px; }
+
+  /* key sheet: a bottom sheet over the tab bar (it is a modal, so it covers the bar on purpose) */
+  .sheet {
+    width: 100%; max-width: 100%; max-height: calc(100dvh - 24px); margin: auto 0 0; overflow-y: auto; overscroll-behavior: contain;
+    padding: 26px 20px calc(20px + env(safe-area-inset-bottom)); border-radius: 26px 26px 0 0; border-bottom: 0;
+  }
+  .sheet::before {
+    content: ''; position: absolute; top: 9px; left: 50%; width: 38px; height: 4px; margin-left: -19px; border-radius: 2px; background: rgba(255, 255, 255, .22);
+  }
+  .sheet[open] { animation: sheetUp .34s cubic-bezier(.2, .8, .2, 1) both; }
+  .sheet-title { font-size: 22px; }
+  .sheet-copy { font-size: 13.5px; margin-bottom: 18px; }
+  .key-input { font-size: 16px; } /* 16px keeps iOS from zooming on focus */
+  .key-input::placeholder { font-size: 14px; }
+  .sheet-actions { flex-wrap: wrap; }
+  .sheet-actions .sheet-btn { flex: 1 1 0; }
+  .sheet-actions > span { display: none; }
+  .sheet-actions .mini-btn.danger { flex: 1 0 100%; height: 40px; order: 3; }
+
+  /* toast: above the tab bar, full width with a gutter */
+  .toast { left: 16px; right: 16px; bottom: calc(var(--tabbar-h) + 12px); translate: none; max-width: none; }
+  /* the playground floats its Generate button above the tab bar */
+  body:has(.stage) .toast { bottom: calc(var(--tabbar-h) + 78px); }
+}
+
+@keyframes sheetUp { 0% { transform: translateY(100%); } 100% { transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet[open] { animation: none; }
+  .pv-chips { scroll-behavior: auto; }
+}
+
+/* touch screens have no real hover: stop cards lifting and sticking after a tap */
+@media (hover: none) {
+  .card.link:hover, .card.link:focus-within { transform: none; }
+}
+
+@media (min-width: 768px) and (max-width: 1179px) {
+  body:has(.stage) .toast { bottom: 92px; }
+}

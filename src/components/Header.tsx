@@ -28,7 +28,7 @@ export default function Header({ mode }: { mode: Mode | null }) {
         <span className="mono lab">LAB</span>
       </div>
       <div role="tablist" aria-label="Mode" className={`modes${mode ? '' : ' none'}`}>
-        <div aria-hidden="true" className="pill" style={{ transform: `translateX(${idx * 176}px)` }} />
+        <div aria-hidden="true" className="pill" style={{ transform: `translateX(calc(${idx} * var(--tab-w)))` }} />
         {TABS.map(([m, label, abbr]) => (
           <button key={m} role="tab" aria-selected={m === mode} className={`tab${m === mode ? ' on' : ''}`} onClick={() => go(`/${m}`)}>
             <span>{label}</span><span className="abbr">{abbr}</span>

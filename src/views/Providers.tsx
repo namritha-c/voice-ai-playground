@@ -58,23 +58,23 @@ export default function Providers() {
   return (
     <main className="page">
       <PageBackdrop />
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: 20 }}>
+      <div className="pv-head">
         <PageTitle text="Providers." t={t} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 16 }}>
+        <div className="pv-count">
           <span className="serif" style={{ fontSize: 30, lineHeight: 1, fontStyle: 'italic', letterSpacing: '-0.02em', fontVariationSettings: "'opsz' 36, 'wght' 380, 'SOFT' 100, 'WONK' 1", fontVariantNumeric: 'lining-nums' }}>
             {connected}<span style={{ color: 'var(--mute-2)' }}> / {data.length}</span>
           </span>
           <span className="mono" style={{ fontSize: 11, letterSpacing: '0.14em', color: 'var(--mute)' }}>KEYS ADDED</span>
         </div>
-        <div style={{ flexGrow: 1 }} />
-        <div style={{ position: 'relative', width: 280, paddingBottom: 12 }}>
+        <div className="pv-spacer" />
+        <div className="pv-search">
           <label htmlFor="pq" className="sr">Search providers</label>
           <span style={{ position: 'absolute', left: 16, top: 15, color: 'var(--mute)', display: 'flex' }}><IconSearch /></span>
           <input id="pq" className="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search providers" />
         </div>
       </div>
 
-      <div role="group" aria-label="Filter by capability" style={{ position: 'relative', display: 'flex', gap: 8, marginTop: 30 }}>
+      <div role="group" aria-label="Filter by capability" className="pv-chips">
         {FILTERS.map(([id, label]) => {
           const n = id === 'all' ? data.length : data.filter((p) => p.caps.includes(id)).length;
           return (

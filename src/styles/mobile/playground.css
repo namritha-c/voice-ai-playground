@@ -1,0 +1,123 @@
+/*
+ * Playground (/tts /stt /sts) below the desktop floor. Desktop (>=1180px) is untouched: every rule here sits in a media query.
+ *   <=1179px  tablet: .stage is one scrolling column. The settings .aside drops below .main as a two-column band.
+ *   <=1023px  narrow tablet: smaller orb, output bar reflows to a grid, STS cards narrow.
+ *   <=767px   phone: hero stacks, settings go single column, output grid tightens.
+ * In the stacked layouts the Generate button floats over the page so it stays in reach while you scroll.
+ */
+
+@keyframes pgFade { from { opacity: 0; } }
+
+@media (max-width: 1179px) {
+  .stage { flex-direction: column; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; }
+  .stage > .main { flex: 1 0 auto; padding: 28px 32px; }
+
+  /* The fixed Generate button must not get a transformed ancestor, or it would pin to the aside instead of the viewport.
+     So the aside fades in and out without the slide the other sections use. */
+  .stage > .aside { animation-name: pgFade; }
+  .app[data-leaving] .stage > .aside { transform: none; }
+
+  .stage > .aside {
+    flex: 0 0 auto; width: auto; min-height: auto; border-left: 0; border-top: 1px solid var(--glass-line);
+    -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(13, 12, 10, .72);
+    display: grid; grid-template-columns: minmax(240px, 1fr) minmax(0, 1.5fr); grid-template-rows: auto auto 1fr;
+    column-gap: 32px; row-gap: 22px; align-content: start;
+    padding: 28px 32px calc(60px + 48px + env(safe-area-inset-bottom));
+  }
+  .stage > .aside > .scroll { grid-column: 2; grid-row: 1 / 4; overflow: visible; margin-right: 0 !important; padding-right: 0 !important; }
+  .stage > .aside > .field { grid-column: 1; }
+
+  .stage > .aside > .gen {
+    position: fixed; z-index: 15; bottom: calc(20px + env(safe-area-inset-bottom));
+    left: calc(50% + 38px); translate: -50% 0; width: min(420px, calc(100% - 76px - 48px));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 12px 40px -10px var(--accent-glow), 0 18px 40px -8px rgba(0, 0, 0, .75);
+  }
+  .stage > .aside > .gen:disabled { box-shadow: 0 18px 40px -8px rgba(0, 0, 0, .75); }
+  /* the dashed "add key" variant is see-through on desktop; floating over content it needs a floor */
+  .stage > .aside > .gen.needs-key { background: color-mix(in srgb, var(--accent) 12%, #0F0E0C); }
+  .stage > .aside > .gen.needs-key:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 20%, #0F0E0C); }
+
+  /* touch targets: grow the hit area to 44px without changing how the control looks */
+  .stage :is(.chip, .mini-btn, .prev, .sw, .icon-btn.sm)::before {
+    content: ''; position: absolute; inset: min(0px, (100% - 44px) / 2); border-radius: 12px;
+  }
+  .stage .chips { gap: 8px; }
+  .stage .chip { height: 36px; }
+  .stage .mini-btn { height: 36px; }
+  .stage .vid { height: 48px; }
+  .stage .vsearch { height: 44px; font-size: 16px; }
+  .stage .rng { height: 44px; background-size: 100% 4px !important; background-position: center !important; background-repeat: no-repeat !important; box-shadow: none; margin: -6px 0; }
+  .stage .rng::-webkit-slider-thumb { width: 24px; height: 24px; }
+  .stage .rng::-moz-range-thumb { width: 16px; height: 16px; }
+}
+
+@media (max-width: 1023px) {
+  .hero { height: 300px; }
+  .hero-copy { min-width: 0; }
+  .hero .orb { transform: scale(.75); margin: -50px; }
+
+  .sts-target { flex-basis: 220px; }
+
+  /* two rows: controls and readouts on top, the waveform full width below */
+  .output {
+    height: auto; display: grid; grid-template-columns: 60px minmax(0, 1fr) auto auto 44px 44px;
+    grid-template-areas: 'play meta time metric dl cp' 'wave wave wave wave wave wave';
+    align-items: center; gap: 12px 16px; padding: 16px 20px;
+  }
+  .output > .play { grid-area: play; }
+  .output > .out-meta { grid-area: meta; width: auto; min-width: 0; }
+  .output > .wave { grid-area: wave; height: 52px; justify-content: space-between; }
+  .output > .time { grid-area: time; width: auto; }
+  .output > .metric { grid-area: metric; width: auto; min-width: 56px; }
+  .output > .icon-btn:nth-last-child(2) { grid-area: dl; }
+  .output > .icon-btn:last-child { grid-area: cp; }
+}
+
+@media (max-width: 767px) {
+  .stage > .main { padding: 20px 16px 24px; gap: 16px; }
+
+  .hero { flex-direction: column; align-items: stretch; height: auto; gap: 4px; }
+  .hero-copy { width: auto; gap: 0; }
+  .hero .chain { display: none; }
+  .hl { transform: scale(.72); transform-origin: 0 0; margin-bottom: calc(152px * -.28); }
+  /* 400px orb shown at 260px; the negative margins give back the space the scale frees, and centre it past the 358px column */
+  .hero .orb { transform: scale(.65); margin: -70px calc(50% - 200px); }
+
+  .input-panel { min-height: 200px; padding: 18px 18px 14px; border-radius: 20px; }
+  .script { min-height: 132px; font-size: 18px; }
+  .transcript { font-size: 18px; }
+  .foot > span:first-child:not(:only-child) { display: none; }
+  .foot > :last-child { margin-left: auto; }
+
+  .sts-src { flex-direction: column; gap: 10px; }
+  .sts-card { flex: 0 0 auto; }
+  .sts-target { flex-basis: auto; }
+  .sts-flow { rotate: 90deg; margin: 6px 0; }
+  .sts-wave { min-height: 64px; }
+  .sts-name { font-size: 32px; }
+
+  /* three rows: play + title + export, waveform, then time and the latency readout */
+  .output {
+    grid-template-columns: 56px minmax(0, 1fr) 44px 44px; grid-template-areas: 'play meta dl cp' 'wave wave wave wave' 'time time metric metric';
+    gap: 10px 12px; padding: 14px 16px; border-radius: 20px;
+  }
+  .output > .wave { height: 44px; }
+  .output > .time { text-align: left; }
+  .output > .metric { flex-direction: row; align-items: baseline; justify-content: flex-end; gap: 10px; }
+  .output > .play { width: 56px; height: 56px; }
+
+  .stage > .aside {
+    display: flex; gap: 22px;
+    padding: 24px 16px calc(54px + 12px + 24px);
+  }
+  .stage > .aside > .gen { left: 16px; right: 16px; width: auto; translate: none; height: 54px; bottom: calc(var(--tabbar-h) + 12px); }
+}
+
+/* touch screens: no hover lift that sticks after a tap */
+@media (hover: none) {
+  .stage .vcard:hover { transform: none; }
+}
+
+@media (max-width: 1179px) and (prefers-reduced-motion: reduce) {
+  .stage > .aside { animation: none; }
+}

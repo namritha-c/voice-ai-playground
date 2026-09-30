@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import ListBoard from '../components/rankings/ListBoard';
 import S2SBoard from '../components/rankings/S2SBoard';
 import ScoreBoard from '../components/rankings/ScoreBoard';
-import { Callout } from '../components/rankings/kit';
+import { Callout, stillNow } from '../components/rankings/kit';
 import { CATEGORIES, CHECKED, SOURCES, type Board, type CatId, type Category } from '../data/rankings';
 import { CAP_STYLE } from '../lib/anim';
 import { useBorrowMode } from '../lib/pageMode';
@@ -38,6 +38,7 @@ export default function Rankings() {
   const board = cat.boards.find((b) => b.id === sub[cat.id]) ?? cat.boards[0];
   const [stuck, setStuck] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
+  const strip = useRef<HTMLDivElement>(null);
   useBorrowMode(cat.mode);
 
   useEffect(() => {
@@ -47,6 +48,14 @@ export default function Rankings() {
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
+  // On narrow screens the tabs are a sideways strip. Keep the picked tab centred in it. A strip that fits does not move.
+  useEffect(() => {
+    const el = strip.current;
+    const on = el?.querySelector<HTMLElement>('.fchip.on');
+    if (!el || !on || el.scrollWidth <= el.clientWidth) return;
+    el.scrollTo({ left: on.offsetLeft - (el.clientWidth - on.offsetWidth) / 2, behavior: stillNow() ? 'auto' : 'smooth' });
+  }, [id]);
 
   const pick = (next: CatId) => {
     setId(next);
@@ -70,7 +79,7 @@ export default function Rankings() {
       </div>
 
       <div ref={sentinel} aria-hidden="true" style={{ height: 1, marginTop: 26 }} />
-      <div className={`rk-tabs${stuck ? ' stuck' : ''}`} role="group" aria-label="Category">
+      <div ref={strip} className={`rk-tabs${stuck ? ' stuck' : ''}`} role="group" aria-label="Category">
         {CATEGORIES.map((c) => {
           const color = CAP_STYLE[c.mode][1];
           return (

@@ -99,7 +99,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
     linear-gradient(180deg, rgba(12, 11, 10, .3), rgba(12, 11, 10, .5));
 }
 .rail, .col { z-index: 1; }
-.app { height: 100vh; min-width: 1180px; display: flex; background: var(--bg); color: var(--ink); position: relative; overflow: hidden; }
+.app { height: 100vh; height: 100dvh; display: flex; background: var(--bg); color: var(--ink); position: relative; overflow: hidden; }
 .rail {
   width: 76px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: 14px 0 20px; border-right: 1px solid var(--glass-line); background: rgba(10, 9, 8, .55); backdrop-filter: var(--blur); position: relative;
@@ -136,10 +136,11 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visi
 .api-state .dot { width: 7px; height: 7px; border-radius: 50%; }
 
 .modes { position: relative; display: flex; padding: 4px; background: var(--glass-2); border: 1px solid var(--glass-line); border-radius: 999px; box-shadow: var(--glass-hi); backdrop-filter: var(--blur); }
-.modes .pill { position: absolute; top: 4px; left: 4px; width: 176px; height: 40px; border-radius: 999px; background: var(--ink); box-shadow: 0 0 34px -4px var(--accent-glow), 0 4px 14px rgba(0, 0, 0, .35); transition: transform .6s cubic-bezier(.7, 0, .2, 1), box-shadow .8s; will-change: transform; }
+.modes { --tab-w: 176px; }
+.modes .pill { position: absolute; top: 4px; left: 4px; width: var(--tab-w); height: 40px; border-radius: 999px; background: var(--ink); box-shadow: 0 0 34px -4px var(--accent-glow), 0 4px 14px rgba(0, 0, 0, .35); transition: transform .6s cubic-bezier(.7, 0, .2, 1), box-shadow .8s; will-change: transform; }
 .modes.none .pill { opacity: 0; }
 .tab {
-  position: relative; width: 176px; height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative; width: var(--tab-w); height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px;
   border: 0; background: transparent; color: var(--ink-4); font-size: 14px; font-variation-settings: 'wdth' 84, 'wght' 480;
   letter-spacing: .01em; transition: color .35s, font-variation-settings .6s var(--ease);
 }

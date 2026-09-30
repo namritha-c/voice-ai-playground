@@ -1,0 +1,54 @@
+/*
+ * Responsive shell. Breakpoints used across src/styles/mobile/*:
+ *   tablet  max-width: 1179px   (the old desktop floor)
+ *   phone   max-width: 767px
+ * On phones the rail becomes a bottom tab bar; pages keep scrolling inside their own container.
+ * --tabbar-h and --header-h are the space pages must leave clear.
+ */
+:root { --tabbar-h: 0px; --header-h: 72px; }
+
+@media (max-width: 1179px) {
+  .header { padding: 0 20px 0 24px; }
+  .brand, .header-right { width: auto; flex: 1 1 0; }
+  .modes { --tab-w: 150px; }
+}
+
+/* below this the full tab labels no longer fit beside the brand, so the tabs show their abbreviations */
+@media (max-width: 1023px) {
+  .modes { --tab-w: 64px; padding: 3px; }
+  .modes .pill { top: 3px; left: 3px; height: 36px; }
+  .tab { height: 36px; font-size: 0; gap: 0; }
+  .tab .abbr { font-size: 11px; opacity: 1; letter-spacing: .12em; }
+}
+
+@media (max-width: 767px) {
+  .modes { --tab-w: 58px; }
+  :root { --tabbar-h: calc(62px + env(safe-area-inset-bottom)); --header-h: 56px; }
+  .app { flex-direction: column; }
+  .col { flex: 1 1 auto; min-height: 0; padding-bottom: var(--tabbar-h); }
+
+  .rail {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; width: auto; height: var(--tabbar-h);
+    flex-direction: row; justify-content: space-around; gap: 0; padding: 8px 12px env(safe-area-inset-bottom);
+    border-right: 0; border-top: 1px solid var(--glass-line); background: rgba(10, 9, 8, .72);
+  }
+  .rail > div, .rail .avatar, .rail .rail-btn:disabled { display: none; }
+  .rail-btn { width: 56px; height: 44px; }
+  .rail-btn.on::before { left: 14px; right: 14px; top: -9px; bottom: auto; width: auto; height: 3px; border-radius: 0 0 3px 3px; }
+  .rail-btn[data-tip]:hover::after, .rail-btn[data-tip]:focus-visible::after { display: none; }
+
+  .header { height: var(--header-h); padding: 0 12px 0 16px; gap: 10px; }
+  .brand { flex: 0 0 auto; gap: 8px; }
+  .brand .lab { display: none; }
+  /* LiquidWord sizes itself inline; cap it so brand, tabs and the keys chip share 390px */
+  .brand .word .liquid-word { height: 30px !important; }
+  .brand .word .liquid-stack { height: 30px !important; width: 118px !important; }
+  .brand .word .liquid-word > .serif { font-size: 22px !important; }
+  .header-right { flex: 0 0 auto; }
+  .header-right .keys-chip { font-size: 0; gap: 0; padding: 0; width: 34px; justify-content: center; }
+  .header-right .api-state { font-size: 0; gap: 0; }
+  .modes.none { display: none; }
+
+  .page { padding: 28px 16px 32px; }
+  .hl-big { font-size: 48px; }
+}

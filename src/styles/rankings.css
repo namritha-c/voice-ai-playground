@@ -289,3 +289,186 @@
   .rk-lead { grid-template-columns: minmax(0, 1fr); }
   .rk-s2s-top, .rk-two { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ==========================================================================
+   TABLET and PHONE. Breakpoints match src/styles/mobile/shell.css.
+   Desktop (min-width 1180px) takes nothing from this section.
+   ========================================================================== */
+
+/* ---------- tablet and phone (max-width 1179px) ---------- */
+@media (max-width: 1179px) {
+  /* Title row: the title gets its own line, stamp and note share the next one. */
+  .rk-top { flex-wrap: wrap; align-items: flex-end; gap: 14px 28px; }
+  .rk-top > .hl-big { flex: 1 0 100%; }
+  .rk-top > div[style] { display: none; }
+  .rk-stamp { padding-bottom: 0; }
+  .rk-disclaimer { flex: 1 1 240px; max-width: 360px; margin: 0; }
+
+  /* Category tabs: one sideways strip, never a wrap. .page padding is still 52px 56px here. */
+  .rk-tabs {
+    flex-shrink: 0; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: 56px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .rk-tabs::-webkit-scrollbar { display: none; }
+  .rk-tabs > .fchip { flex: 0 0 auto; height: 44px; padding: 0 16px; scroll-snap-align: center; white-space: nowrap; }
+  .rk-sub { height: 44px; }
+
+  /* Score rows: narrower bar and value columns. .rk-cols, .rk-axis and .rk-row must keep the same template. */
+  .rk-cols, .rk-axis, .rk-row { grid-template-columns: 44px minmax(0, 1.2fr) minmax(120px, .8fr) 80px; gap: 16px; }
+  .rk-cols.list, .rk-axis.list, .rk-row.list { grid-template-columns: 44px minmax(0, 1fr) 220px; }
+  .rk-row.list > .rk-who:last-child { grid-column: 2 / -1; }
+
+  /* Speech to speech ranking: a two-line card. Rank, name and index on top, three labelled chips below. */
+  .rk-s2s-cols { display: none; }
+  .rk-row.s2s { grid-template-columns: 44px repeat(3, minmax(0, 180px)); gap: 12px 10px; align-items: start; }
+  .rk-row.s2s > .rk-rank { grid-row: 1; padding-top: 5px; }
+  .rk-row.s2s > .rk-who-head { grid-column: 2 / -1; padding-right: 84px; }
+  .rk-row.s2s > .rk-cell::before { font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--mute-2); }
+  .rk-row.s2s > .rk-cell:nth-child(3)::before { content: 'Index'; }
+  .rk-row.s2s > .rk-cell:nth-child(4)::before { content: 'Reasoning'; }
+  .rk-row.s2s > .rk-cell:nth-child(5)::before { content: 'Full-duplex'; }
+  .rk-row.s2s > .rk-cell:nth-child(6)::before { content: 'TTFA'; }
+  .rk-row.s2s > .rk-cell:nth-child(3) { position: absolute; top: 14px; right: 12px; flex-direction: column; align-items: flex-end; gap: 3px; font-size: 17px; color: var(--ink); }
+  .rk-row.s2s > .rk-cell:nth-child(3).best { color: var(--accent); }
+  .rk-row.s2s > .rk-cell:nth-child(n+4) {
+    position: relative; grid-row: 2; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; padding: 7px 10px 11px;
+    border-radius: 10px; border: 1px solid rgba(255, 255, 255, .07); background: rgba(255, 255, 255, .035); font-size: 13px;
+  }
+  .rk-row.s2s > .rk-cell:nth-child(4) { grid-column: 2; }
+  .rk-row.s2s > .rk-cell:nth-child(5) { grid-column: 3; }
+  .rk-row.s2s > .rk-cell:nth-child(6) { grid-column: 4; }
+  .rk-row.s2s > .rk-cell em { position: absolute; left: 10px; bottom: 5px; width: calc(var(--w) * (100% - 20px)); height: 3px; }
+  .rk-row.s2s.picked::after { left: 20px; right: auto; top: auto; bottom: 18px; translate: 0 0; }
+
+  /* Pipeline: nodes may shrink so all four fit. */
+  .rk-flow-node { min-width: 0; padding: 12px; }
+  .rk-flow-node b { font-size: 16px; }
+  .rk-flow-wire { min-width: 12px; margin: 0 3px; }
+
+  .rk-takeaway { font-size: 26px; }
+  .rk-lead.solo .rk-takeaway { font-size: 24px; }
+
+  /* Touch screens keep a sticky hover after a tap. Drop the row hover there. */
+  @media (hover: none) {
+    .rk-row:not(.top):not(.picked):hover { background: transparent; }
+    .rk-row:hover .rk-name { font-style: normal; letter-spacing: -.02em; font-variation-settings: 'opsz' 36, 'wght' 360, 'SOFT' 30, 'WONK' 0; }
+  }
+}
+
+/* ---------- phone (max-width 767px). .page padding is 28px 16px 32px. ---------- */
+@media (max-width: 767px) {
+  .rk-top { gap: 12px 20px; }
+  .rk-stamp-v { font-size: 20px; }
+  .rk-disclaimer { flex-basis: 180px; font-size: 12.5px; }
+
+  .rk-tabs { top: -28px; gap: 6px; margin: 0 -16px; padding: 10px 16px; scroll-padding-inline: 16px; }
+  .rk-tabs.stuck { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 16px 30px -22px rgba(0, 0, 0, .8); }
+
+  .rk-cat { gap: 18px; margin-top: 18px; }
+  .rk-cat-head { gap: 10px; }
+  .rk-cat-title { font-size: 40px; letter-spacing: -.035em; }
+  .rk-cat-blurb { font-size: 14.5px; line-height: 1.55; }
+  .rk-subtabs { flex-shrink: 0; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .rk-sub { flex: 0 0 auto; padding: 0 16px; font-size: 13px; white-space: nowrap; }
+  .rk-body { gap: 16px; }
+
+  .rk-panel { border-radius: 18px; }
+  .rk-pad { padding: 18px 16px; }
+
+  /* Lead: podium stays, at about two thirds size. */
+  .rk-takeaway, .rk-lead.solo .rk-takeaway { font-size: 21px; line-height: 1.28; }
+  .rk-read { gap: 14px; padding: 0 2px; }
+  .rk-podium-panel { padding: 18px 14px 0; }
+  .rk-podium { gap: 8px; min-height: 0; }
+  .rk-pod-top { gap: 4px; padding-bottom: 10px; }
+  .rk-pod-name { margin-top: 6px; font-size: 14.5px; }
+  .rk-pod-by { font-size: 10px; overflow-wrap: anywhere; }
+  .rk-pod-val { font-size: 28px; }
+  .rk-pod-val i { font-size: 14px; }
+  .rk-stand { height: calc(var(--h) * .62); border-radius: 12px 12px 0 0; }
+  .rk-stand span { bottom: -8px; font-size: 76px; }
+
+  /* Boards: one compact header line in place of the column header. */
+  .rk-board { padding-bottom: 8px; }
+  .rk-board-head { flex-direction: column; align-items: flex-start; gap: 8px; padding: 18px 16px 4px; }
+  .rk-dir { white-space: normal; }
+  .rk-cols, .rk-cols.list { display: block; margin: 0 6px; padding: 14px 10px 10px; }
+  .rk-cols > span:not(.rk-col-metric), .rk-cols.list:not(:has(.rk-col-metric)) { display: none; }
+  .rk-col-metric, .rk-cols.list .rk-col-metric { flex-flow: row wrap; align-items: baseline; justify-content: flex-start; gap: 2px 6px; text-align: left; line-height: 1.5; }
+  .rk-col-metric b:not(:last-child)::after { content: ' ·'; color: var(--mute-3); }
+
+  /* Ticks sit over the bar: the bar runs from the row's left edge to the value column (72px plus a 12px gap). */
+  .rk-axis, .rk-axis.list { display: block; padding: 0 16px; }
+  .rk-axis > span { display: none; }
+  .rk-axis:not(.list) .rk-ticks { margin-right: 84px; }
+
+  .rk-rows { padding: 0 6px; }
+  .rk-row { grid-template-columns: 28px minmax(0, 1fr) 72px; gap: 12px; align-items: start; padding: 14px 10px; border-radius: 14px; }
+  .rk-row.top::before { top: 14px; bottom: 14px; }
+  .rk-rank { padding-top: 7px; font-size: 26px; }
+  .rk-who { grid-column: 2 / -1; gap: 8px; }
+  .rk-who-head { gap: 12px; }
+  .rk-name { font-size: 19px; }
+  .rk-by { font-size: 11px; }
+  .rk-who > p, .rk-who > dl, .rk-who > button { margin-left: 0; }
+  .rk-note { font-size: 13px; }
+  .rk-try { height: 44px; padding: 0 16px; font-size: 12.5px; }
+  .rk-track { grid-column: 1 / 3; align-self: center; }
+  .rk-val { align-self: center; font-size: 14px; }
+
+  /* List rows: the side column (meters, range, hero stat) moves under the name. */
+  .rk-row.list { grid-template-columns: 28px minmax(0, 1fr); }
+  .rk-row.list > :nth-child(3) { grid-column: 1 / -1; }
+  .rk-row.list > .rk-hero { grid-column: 2; flex-flow: row wrap; align-items: baseline; gap: 4px 10px; text-align: left; }
+  .rk-hero .serif { font-size: 26px; }
+  .rk-range-label { text-align: left; }
+
+  /* Speech to speech ranking card. */
+  .rk-row.s2s { grid-template-columns: 28px repeat(3, minmax(0, 1fr)); gap: 12px 6px; }
+  .rk-row.s2s > .rk-rank { padding-top: 5px; font-size: 24px; }
+  .rk-row.s2s > .rk-who-head { padding-right: 64px; }
+  .rk-row.s2s .rk-name { font-size: 16.5px; }
+  .rk-row.s2s > .rk-cell:nth-child(3) { top: 14px; right: 10px; font-size: 16px; }
+  .rk-row.s2s > .rk-cell:nth-child(n+4) { padding: 6px 8px 10px; font-size: 12.5px; }
+  .rk-row.s2s > .rk-cell::before { font-size: 8.5px; letter-spacing: .08em; }
+  .rk-row.s2s > .rk-cell em { left: 8px; width: calc(var(--w) * (100% - 16px)); }
+  .rk-row.s2s.picked::after { left: 17px; }
+
+  /* Scatter: S2SBoard draws a 380x350 frame here, so text stays near its set size. */
+  .rk-plot { padding-bottom: 6px; }
+  .rk-vendors { justify-content: flex-start; gap: 6px 12px; }
+  .rk-scatter { padding: 4px 6px 0; }
+  .rk-dot .halo { r: 20px; }
+  .rk-detail { gap: 12px; padding: 18px 16px; }
+  .rk-detail-name { font-size: 20px; }
+  .rk-detail-idx > .serif { font-size: 56px; }
+  .rk-detail-idx > .rk-unranked { font-size: 30px; }
+
+  .rk-donut-wrap { gap: 18px; }
+  .rk-donut { flex-basis: 112px; width: 112px; height: 112px; }
+  .rk-donut-list { font-size: 13px; }
+  .rk-more h4 { font-size: 17px; }
+
+  /* Pipeline turns vertical. The packet runs down each wire. */
+  .rk-flow { padding: 18px 16px 14px; }
+  .rk-flow-steps { flex-direction: column; margin-top: 14px; }
+  .rk-flow-steps li, .rk-flow-steps li:last-child { flex-direction: column; align-items: stretch; flex: 0 0 auto; }
+  .rk-flow-node { padding: 12px 16px; }
+  .rk-flow-wire { flex: 0 0 auto; align-self: flex-start; width: 2px; min-width: 0; height: 22px; margin: 4px 0 4px 26px; }
+  .rk-flow-wire i { left: 50%; top: 0; margin: 0 0 0 -4.5px; animation-name: rkPacketV; }
+  .rk-wave { margin-top: 14px; }
+
+  .rk-fold summary { min-height: 52px; padding: 14px 18px; }
+  .rk-changed { padding: 0 18px 18px; font-size: 13.5px; }
+  .rk-terms { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 0 18px 20px; }
+  .rk-foot { margin-top: 32px; }
+  .rk-callout { padding: 12px 14px; }
+  .rk-callout p { font-size: 13.5px; }
+}
+
+@keyframes rkPacketV { 0%, 28%, 100% { opacity: 0; top: 0; } 6% { opacity: 1; top: 0; } 24% { opacity: 1; top: calc(100% - 9px); } 27% { opacity: 0; top: calc(100% - 9px); } }
+
+@media (max-width: 1179px) and (prefers-reduced-motion: reduce) {
+  .rk-tabs { scroll-behavior: auto; }
+  .rk-flow-wire i { animation: none; opacity: 0; }
+}

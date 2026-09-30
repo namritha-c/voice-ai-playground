@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import type { S2SBoard as Board, S2SEntry } from '../../data/rankings';
 import { Callout, Num, ProviderTile, Tag, along } from './kit';
 
@@ -9,12 +9,26 @@ const VENDOR: Record<string, string> = {
   Google: '#B9A2FF', OpenAI: '#F2EDE4', SpaceXAI: '#FF6A2B', 'Alibaba Cloud': '#A6E35A', StepFun: '#8F887D', Amazon: '#8F887D',
 };
 
-const W = 860, H = 400, L = 58, R = 26, T = 28, B = 56;
+/** Plot frame in SVG units. Narrow screens get a smaller frame so the 12-unit labels stay close to 12px on screen. */
+interface Frame { W: number; H: number; L: number; R: number; T: number; B: number }
+const WIDE: Frame = { W: 860, H: 400, L: 58, R: 26, T: 28, B: 56 };
+const MID: Frame = { W: 640, H: 380, L: 52, R: 20, T: 28, B: 54 };
+const NARROW: Frame = { W: 380, H: 350, L: 48, R: 12, T: 30, B: 52 };
 const XD: [number, number] = [0.6, 1.7];
 const YD: [number, number] = [62, 86];
+
+const TABLET = '(max-width: 1179px)', PHONE = '(max-width: 767px)';
+const onResize = (cb: () => void) => { window.addEventListener('resize', cb); return () => window.removeEventListener('resize', cb); };
+const frameNow = () => (matchMedia(PHONE).matches ? 'narrow' : matchMedia(TABLET).matches ? 'mid' : 'wide');
+const FRAMES = { wide: WIDE, mid: MID, narrow: NARROW };
+/** Server render and desktop use the wide frame. */
+const useFrame = (): Frame => FRAMES[useSyncExternalStore(onResize, frameNow, () => 'wide' as const)];
+
 /** Faster sits to the right, so up and to the right is best on both axes. */
-const px = (t: number) => L + (1 - along(t, XD)) * (W - L - R);
-const py = (v: number) => H - B - along(v, YD) * (H - T - B);
+const scales = ({ W, H, L, R, T, B }: Frame) => ({
+  px: (t: number) => L + (1 - along(t, XD)) * (W - L - R),
+  py: (v: number) => H - B - along(v, YD) * (H - T - B),
+});
 
 type Plotted = S2SEntry & { index: number; ttfa: number };
 const plottable = (e: S2SEntry): e is Plotted => e.index !== null && e.ttfa !== null;
@@ -28,7 +42,8 @@ function frontier(pts: Plotted[]): Plotted[] {
 }
 
 /** Name tag for the picked dot. It has its own solid fill so the trade-off line never cuts through the text. */
-function Pin({ e }: { e: Plotted }) {
+function Pin({ e, f }: { e: Plotted; f: Frame }) {
+  const { W, R, T, L } = f, { px, py } = scales(f);
   const w = e.short.length * 6.8 + 22, h = 24;
   const x = Math.max(L, Math.min(W - R - w, px(e.ttfa) - w / 2));
   const above = py(e.index) - 22 - h > T;
@@ -42,6 +57,8 @@ function Pin({ e }: { e: Plotted }) {
 }
 
 function Scatter({ pts, sel, onSel }: { pts: Plotted[]; sel: S2SEntry; onSel: (e: S2SEntry) => void }) {
+  const f = useFrame();
+  const { W, H, L, R, T, B } = f, { px, py } = scales(f);
   const edge = useMemo(() => frontier(pts), [pts]);
   const d = edge.map((p, i) => `${i ? 'L' : 'M'}${px(p.ttfa).toFixed(1)} ${py(p.index).toFixed(1)}`).join(' ');
   const xs = [0.8, 1.0, 1.2, 1.4, 1.6];
@@ -81,7 +98,7 @@ function Scatter({ pts, sel, onSel }: { pts: Plotted[]; sel: S2SEntry; onSel: (e
           </g>
         );
       })}
-      {on && <Pin e={on} />}
+      {on && <Pin e={on} f={f} />}
     </svg>
   );
 }
