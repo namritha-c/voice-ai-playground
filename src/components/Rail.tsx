@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import NavLink from './NavLink';
-import { IconCompare, IconPlug, IconSliders, IconWave } from './Icons';
+import { IconCompare, IconPlug, IconSliders, IconTrophy, IconWave } from './Icons';
 
 export default function Rail() {
   const path = usePathname();
@@ -10,6 +10,7 @@ export default function Rail() {
   return (
     <nav className="rail" aria-label="Primary">
       <NavLink href="/tts" className={`rail-btn${inPlayground ? ' on' : ''}`} aria-label="Playground" data-tip="PLAYGROUND"><IconWave /></NavLink>
+      <NavLink href="/rankings" className={`rail-btn${path === '/rankings' ? ' on' : ''}`} aria-label="Rankings" data-tip="RANKINGS"><IconTrophy /></NavLink>
       <button className="rail-btn" aria-label="Compare providers (coming soon)" data-tip="COMPARE · SOON" disabled><IconCompare /></button>
       <NavLink href="/providers" className={`rail-btn${path === '/providers' ? ' on' : ''}`} aria-label="Providers" data-tip="PROVIDERS"><IconPlug /></NavLink>
       <div style={{ flexGrow: 1 }} />

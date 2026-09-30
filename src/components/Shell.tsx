@@ -8,6 +8,7 @@ import type { Mode } from '../api/client';
 import { ACCENTS } from '../lib/anim';
 import { startGlass } from '../lib/glass';
 import { direction, endLeaving, modeOf } from '../lib/nav';
+import { usePageMode } from '../lib/pageMode';
 import Header from './Header';
 import { NoWebGL, OrbHost } from './playground/OrbHost';
 import { KeySheetProvider } from './KeySheet';
@@ -41,15 +42,17 @@ export default function Shell({ children }: { children: ReactNode }) {
 function Chrome({ children }: { children: ReactNode }) {
   const path = usePathname();
   const mode: Mode | null = modeOf(path);
+  const borrowed = usePageMode();
+  const accent: Mode = mode ?? borrowed ?? 'tts';
   // Which way the tab strip moved, so the incoming page slides in from that side.
   const [seen, setSeen] = useState({ path, dir: 0 });
   if (seen.path !== path) setSeen({ path, dir: direction(seen.path, path) });
   useLayoutEffect(endLeaving, [path]);
   useEffect(() => startGlass(), []);
   return (
-    <div className={`app mode-${mode ?? 'tts'}`} data-dir={seen.dir}>
+    <div className={`app mode-${accent}`} data-dir={seen.dir}>
       <NoWebGL><Aurora /></NoWebGL>
-      <OrbHost accent={ACCENTS[mode ?? 'tts']} />
+      <OrbHost accent={ACCENTS[accent]} />
       <Rail />
       <div className="col">
         <Header mode={mode} />
