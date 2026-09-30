@@ -9,10 +9,11 @@ const VENDOR: Record<string, string> = {
   Google: '#B9A2FF', OpenAI: '#F2EDE4', SpaceXAI: '#FF6A2B', 'Alibaba Cloud': '#A6E35A', StepFun: '#8F887D', Amazon: '#8F887D',
 };
 
-const W = 680, H = 372, L = 52, R = 22, T = 22, B = 50;
+const W = 860, H = 400, L = 58, R = 26, T = 28, B = 56;
 const XD: [number, number] = [0.6, 1.7];
 const YD: [number, number] = [62, 86];
-const px = (t: number) => L + along(t, XD) * (W - L - R);
+/** Faster sits to the right, so up and to the right is best on both axes. */
+const px = (t: number) => L + (1 - along(t, XD)) * (W - L - R);
 const py = (v: number) => H - B - along(v, YD) * (H - T - B);
 
 type Plotted = S2SEntry & { index: number; ttfa: number };
@@ -24,6 +25,20 @@ function frontier(pts: Plotted[]): Plotted[] {
   let best = -Infinity;
   for (const p of [...pts].sort((a, b) => a.ttfa - b.ttfa)) if (p.index > best) { out.push(p); best = p.index; }
   return out;
+}
+
+/** Name tag for the picked dot. It has its own solid fill so the trade-off line never cuts through the text. */
+function Pin({ e }: { e: Plotted }) {
+  const w = e.short.length * 6.8 + 22, h = 24;
+  const x = Math.max(L, Math.min(W - R - w, px(e.ttfa) - w / 2));
+  const above = py(e.index) - 22 - h > T;
+  const y = above ? py(e.index) - 22 - h : py(e.index) + 22;
+  return (
+    <g className="rk-pin" style={{ '--k': `${e.short.length}` } as React.CSSProperties} key={e.model}>
+      <rect x={x} y={y} width={w} height={h} rx={h / 2} />
+      <text x={x + w / 2} y={y + h / 2 + 4} textAnchor="middle">{e.short}</text>
+    </g>
+  );
 }
 
 function Scatter({ pts, sel, onSel }: { pts: Plotted[]; sel: S2SEntry; onSel: (e: S2SEntry) => void }) {
@@ -46,12 +61,13 @@ function Scatter({ pts, sel, onSel }: { pts: Plotted[]; sel: S2SEntry; onSel: (e
           <text x={px(x)} y={H - B + 20} textAnchor="middle" className="rk-tick">{x.toFixed(1)} s</text>
         </g>
       ))}
-      <text x={L} y={H - 8} className="rk-axis-label">← faster to first audio</text>
-      <text x={14} y={T + 4} className="rk-axis-label" transform={`rotate(-90 14 ${T + 4})`} textAnchor="end">index score →</text>
-      <text x={W - R} y={T + 12} textAnchor="end" className="rk-corner">↖ faster and better</text>
+      <text x={L} y={H - 10} className="rk-axis-label">← slower</text>
+      <text x={W - R} y={H - 10} textAnchor="end" className="rk-axis-label">time to first audio, faster →</text>
+      <text x={16} y={H - B} className="rk-axis-label" transform={`rotate(-90 16 ${H - B})`}>index score →</text>
+      <text x={W - R} y={T + 2} textAnchor="end" className="rk-corner">faster and better ↗</text>
 
       <path d={d} pathLength={1} className="rk-edge" />
-      <text x={px(edge[0].ttfa) + 12} y={py(edge[0].index) - 12} className="rk-edge-label">Best trade-offs</text>
+      <text x={px(edge[0].ttfa) - 14} y={py(edge[0].index) - 14} textAnchor="end" className="rk-edge-label">Best trade-offs</text>
 
       {pts.map((p) => {
         const c = VENDOR[p.provider] ?? '#8F887D';
@@ -65,9 +81,7 @@ function Scatter({ pts, sel, onSel }: { pts: Plotted[]; sel: S2SEntry; onSel: (e
           </g>
         );
       })}
-      {on && (
-        <text x={px(on.ttfa)} y={py(on.index) - 20} textAnchor={px(on.ttfa) > W - 170 ? 'end' : 'middle'} className="rk-pin">{on.short}</text>
-      )}
+      {on && <Pin e={on} />}
     </svg>
   );
 }
