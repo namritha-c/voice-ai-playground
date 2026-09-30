@@ -61,7 +61,7 @@ function Scatter({ pts, sel, onSel }: { pts: Plotted[]; sel: S2SEntry; onSel: (e
             style={{ '--c': c, '--x': `${px(p.ttfa)}px`, '--y': `${py(p.index)}px`, '--d': `${0.2 + pts.indexOf(p) * 0.06}s` } as React.CSSProperties}
             onMouseEnter={() => onSel(p)} onFocus={() => onSel(p)} onClick={() => onSel(p)}>
             <circle className="halo" r={16} />
-            <circle className="core" r={active ? 9 : 6.5} />
+            <circle className="core" r={6.5} />
           </g>
         );
       })}
@@ -164,7 +164,7 @@ export default function S2SBoard({ board }: { board: Board }) {
         </div>
         <div className="rk-rows" role="list">
           {board.entries.map((e, i) => (
-            <button key={e.model} role="listitem" className={`rk-row s2s${sel.model === e.model ? ' sel' : ''}${e.rank !== null && e.rank <= 3 ? ' top' : ''}`}
+            <button key={e.model} role="listitem" className={`rk-row s2s${sel.model === e.model ? ' picked' : ''}${e.rank !== null && e.rank <= 3 ? ' top' : ''}`}
               style={{ '--i': i } as React.CSSProperties} onClick={() => setSel(e)} aria-pressed={sel.model === e.model}>
               <span className="rk-rank serif">{e.rank ?? '–'}</span>
               <span className="rk-who-head">

@@ -5,8 +5,7 @@ import type { Metric, Try } from '../../data/rankings';
 import { useGo } from '../../lib/nav';
 import { actions } from '../../state/playground';
 import { useProviders } from '../../state/useProviders';
-import { IconArrowUpRight, IconKey } from '../Icons';
-import { useKeySheet } from '../KeySheet';
+import { IconArrowUpRight } from '../Icons';
 
 export const stillNow = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -25,13 +24,13 @@ export function Num({ value, decimals = 0, ms = 1100, className }: { value: numb
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [value, ms]);
-  return <span className={className}>{shown.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</span>;
+  return <span className={className}>{shown.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals, useGrouping: false })}</span>;
 }
 
 /** Where `v` sits on the metric's scale, 0 to 1. */
 export const along = (v: number, [a, b]: [number, number]) => Math.max(0, Math.min(1, (v - a) / (b - a)));
 
-export const fmtMetric = (m: Metric, v: number) => `${v.toLocaleString('en-US', { minimumFractionDigits: m.decimals, maximumFractionDigits: m.decimals })}${m.unit}`;
+export const fmtMetric = (m: Metric, v: number) => `${v.toLocaleString('en-US', { minimumFractionDigits: m.decimals, maximumFractionDigits: m.decimals, useGrouping: false })}${m.unit}`;
 
 export const ProviderTile = ({ name, size = 40 }: { name: string; size?: number }) => (
   <span className="mono-tile rk-tile" aria-hidden="true" style={{ width: size, height: size, fontSize: size * 0.46 }}>{name.trim()[0]?.toUpperCase()}</span>
@@ -46,21 +45,18 @@ export const Warn = ({ children }: { children: ReactNode }) => (
 
 export const Tag = ({ children }: { children: string }) => <span className={`rk-tag${/^(New|Added|Fastest|Fast)$/.test(children) ? ' hot' : ''}`}>{children}</span>;
 
-/** Opens the row's provider in the playground, or the key sheet when this browser holds no key for it. */
+/** Opens the row's provider in the playground. Hidden until this browser holds a key for it. */
 export function TryPill({ to }: { to: Try }) {
   const go = useGo();
-  const sheet = useKeySheet();
   const { data } = useProviders();
   const p = data.find((x) => x.id === to.pid);
-  if (!p) return null;
-  const connected = p.connected;
+  if (!p?.connected) return null;
   return (
     <button className="rk-try" onClick={() => {
-      if (!connected) return sheet.open(to.pid);
       actions.provider(to.mode, to.pid);
       go(`/${to.mode}`);
     }}>
-      {connected ? <>Try in playground<IconArrowUpRight size={13} /></> : <><IconKey size={12} />Add key to try</>}
+      Try in playground<IconArrowUpRight size={13} />
     </button>
   );
 }

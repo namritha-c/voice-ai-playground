@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { api, type Mode } from '../api/client';
 import { ACCENTS } from '../lib/anim';
@@ -15,6 +15,7 @@ const TABS: [Mode, string, string][] = [['tts', 'Text to Speech', 'TTS'], ['stt'
 export default function Header({ mode }: { mode: Mode | null }) {
   const router = useRouter();
   const go = useGo();
+  const onRankings = usePathname() === '/rankings';
   useEffect(() => { TABS.forEach(([m]) => router.prefetch(`/${m}`)); }, [router]);
   const idx = mode ? TABS.findIndex((x) => x[0] === mode) : 0;
   const health = useQuery({ queryKey: ['health'], queryFn: api.health, refetchInterval: 15000, retry: false });
@@ -39,7 +40,7 @@ export default function Header({ mode }: { mode: Mode | null }) {
           <span className="mono api-state" title="The server is not reachable">
             <span className="dot" style={{ background: 'var(--danger)' }} />API OFFLINE
           </span>
-        ) : (
+        ) : onRankings ? null : (
           <NavLink href="/providers" className="keys-chip" title="Your API keys stay in this browser">
             <span className="dot" style={{ background: held ? 'var(--stt)' : 'var(--accent)' }} />
             {held ? `${held} of ${providers.length} keys added` : 'Add API keys'}

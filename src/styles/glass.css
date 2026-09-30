@@ -101,11 +101,11 @@
 /* ---------- pointer light ---------- */
 /* keep this selector list in step with GLINT in src/lib/glass.ts */
 .chip, .icon-btn, .mini-btn, .sheet-btn, .fchip, .keys-chip, .card-key, .vcard, .prov-btn { --glint: radial-gradient(110px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, var(--hl, 0)), transparent 70%); }
-.output, .card, .sheet { --glint: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, var(--hl, 0)), transparent 70%); }
+.output, .card, .sheet, .rk-panel { --glint: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, var(--hl, 0)), transparent 70%); }
 .chip:hover, .icon-btn:hover, .mini-btn:hover, .sheet-btn:hover, .fchip:hover, .keys-chip:hover, .card-key:hover, .vcard:hover, .prov-btn:hover { --hl: .2; }
-.output:hover, .card:hover, .sheet:hover { --hl: .07; }
+.output:hover, .card:hover, .sheet:hover, .rk-panel:hover { --hl: .07; }
 .chip::after, .icon-btn::after, .mini-btn::after, .sheet-btn::after, .fchip::after, .keys-chip::after, .card-key::after, .vcard::after, .prov-btn::after,
-.output::after, .card::after, .sheet::after {
+.output::after, .card::after, .sheet::after, .rk-panel::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: var(--glint, none);
 }
 .output { position: relative; }

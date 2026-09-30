@@ -11,7 +11,7 @@
  */
 
 /** Surfaces that follow the pointer with a highlight. Keep in step with the `::after` rule in glass.css. */
-const GLINT = '.chip,.icon-btn,.mini-btn,.sheet-btn,.fchip,.keys-chip,.card-key,.vcard,.prov-btn,.output,.card,.sheet';
+const GLINT = '.chip,.icon-btn,.mini-btn,.sheet-btn,.fchip,.keys-chip,.card-key,.vcard,.prov-btn,.output,.card,.sheet,.rk-panel';
 
 /** Surfaces that refract what is behind their edge. Keep in step with the `--refract` rule in glass.css. */
 const REFRACT = '.sheet,.toast,.output,.card:not(.add)';

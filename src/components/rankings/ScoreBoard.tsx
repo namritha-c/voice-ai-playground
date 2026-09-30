@@ -53,7 +53,7 @@ function Row({ e, board, i }: { e: ScoreEntry; board: Board; i: number }) {
         {e.flag && <Warn>{e.flag}</Warn>}
         {e.try && <TryPill to={e.try} />}
       </div>
-      <div className="rk-track" aria-hidden="true">
+      <div className={`rk-track${w === null ? ' none' : ''}`} aria-hidden="true">
         {w === null ? <span className="rk-nobar">No score on this scale</span> : <i style={{ '--w': w } as React.CSSProperties} />}
       </div>
       <span className="rk-val mono">{e.value === null ? e.shown ?? '–' : fmtMetric(metric, e.value)}</span>
@@ -64,7 +64,7 @@ function Row({ e, board, i }: { e: ScoreEntry; board: Board; i: number }) {
 export default function ScoreBoard({ board }: { board: Board }) {
   const { metric, entries } = board;
   const arrow = metric.better === 'lower' ? '← lower is better' : 'higher is better →';
-  let prev = 0;
+  let ranked = 0;
   return (
     <>
       <div className={`rk-lead${board.podium ? '' : ' solo'}`}>
@@ -87,14 +87,15 @@ export default function ScoreBoard({ board }: { board: Board }) {
           <span />
           <div className="rk-ticks">
             {metric.ticks.map((t) => (
-              <span key={t} className="mono" style={{ left: `${along(t, metric.domain) * 100}%` }}>{t.toLocaleString('en-US')}{metric.unit}</span>
+              <span key={t} className="mono" style={{ left: `${along(t, metric.domain) * 100}%` }}>{t}{metric.unit}</span>
             ))}
           </div>
         </div>
         <div className="rk-rows" role="list">
           {entries.map((e, i) => {
-            const gap = e.rank !== null && prev > 0 && e.rank > prev + 1 && !(e.rank === prev);
-            if (e.rank !== null) prev = e.rank;
+            // Ties share a rank, so the n-th ranked row expects rank n. Anything higher means rows were left out.
+            const gap = e.rank !== null && ranked > 0 && e.rank > ranked + 1;
+            if (e.rank !== null) ranked++;
             return (
               <Fragment key={`${e.model}-${i}`}>
                 {gap && <div className="rk-gap mono" aria-label="Ranks in between are not listed">· · · ranks in between not listed</div>}
