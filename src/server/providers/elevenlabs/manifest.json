@@ -7,7 +7,7 @@
     "tts": {
       "tag": "Multilingual · streaming",
       "max_chars": 5000,
-      "models": ["eleven_multilingual_v2", "eleven_flash_v2_5", "eleven_turbo_v2_5", "eleven_v3"],
+      "models": ["eleven_multilingual_v2", "eleven_flash_v2_5", "eleven_turbo_v2_5", "eleven_v3", "eleven_v4", "eleven_v4_turbo"],
       "voices": {
         "source": "dynamic",
         "items": [
@@ -22,8 +22,8 @@
       "params": [
         {"key": "stability", "label": "Stability", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0.5},
         {"key": "similarity_boost", "label": "Similarity", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0.75},
-        {"key": "style", "label": "Style exaggeration", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0},
-        {"key": "speed", "label": "Speed", "type": "range", "min": 0.7, "max": 1.2, "step": 0.05, "default": 1, "unit": "×"},
+        {"key": "style", "label": "Style exaggeration", "type": "range", "min": 0, "max": 1, "step": 0.05, "default": 0, "models": ["eleven_multilingual_v2", "eleven_flash_v2_5", "eleven_turbo_v2_5", "eleven_v3"]},
+        {"key": "speed", "label": "Speed", "type": "range", "min": 0.7, "max": 1.2, "step": 0.05, "default": 1, "unit": "×", "models": ["eleven_multilingual_v2", "eleven_flash_v2_5", "eleven_turbo_v2_5", "eleven_v3"]},
         {"key": "use_speaker_boost", "label": "Speaker boost", "type": "bool", "default": true},
         {"key": "output_format", "label": "Format", "type": "enum", "options": ["mp3_44100_128", "mp3_22050_32", "pcm_16000"], "default": "mp3_44100_128"}
       ]
