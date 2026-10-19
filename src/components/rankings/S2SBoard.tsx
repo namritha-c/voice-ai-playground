@@ -15,7 +15,7 @@ const WIDE: Frame = { W: 860, H: 400, L: 58, R: 26, T: 28, B: 56 };
 const MID: Frame = { W: 640, H: 380, L: 52, R: 20, T: 28, B: 54 };
 const NARROW: Frame = { W: 380, H: 350, L: 48, R: 12, T: 30, B: 52 };
 const XD: [number, number] = [0.6, 1.7];
-const YD: [number, number] = [62, 86];
+const YD: [number, number] = [62, 90];
 
 const TABLET = '(max-width: 1179px)', PHONE = '(max-width: 767px)';
 const onResize = (cb: () => void) => { window.addEventListener('resize', cb); return () => window.removeEventListener('resize', cb); };
@@ -84,7 +84,8 @@ function Scatter({ pts, sel, onSel }: { pts: Plotted[]; sel: S2SEntry; onSel: (e
       <text x={W - R} y={T + 2} textAnchor="end" className="rk-corner">faster and better ↗</text>
 
       <path d={d} pathLength={1} className="rk-edge" />
-      <text x={px(edge[0].ttfa) - 14} y={py(edge[0].index) - 14} textAnchor="end" className="rk-edge-label">Best trade-offs</text>
+      {/* Below the fastest point: the space above it holds the top scorers and their name tag. */}
+      <text x={px(edge[0].ttfa) - 14} y={py(edge[0].index) + 26} textAnchor="end" className="rk-edge-label">Best trade-offs</text>
 
       {pts.map((p) => {
         const c = VENDOR[p.provider] ?? '#8F887D';
