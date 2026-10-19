@@ -4,6 +4,7 @@ import Shell from '@/components/Shell';
 import '@/styles/global.css';
 import '@/styles/glass.css';
 import '@/styles/rankings.css';
+import '@/styles/platforms.css';
 import '@/styles/mobile/shell.css';
 import '@/styles/mobile/playground.css';
 import '@/styles/mobile/overlays.css';

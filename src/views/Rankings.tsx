@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import NavLink from '../components/NavLink';
 import ListBoard from '../components/rankings/ListBoard';
 import S2SBoard from '../components/rankings/S2SBoard';
 import ScoreBoard from '../components/rankings/ScoreBoard';
@@ -40,6 +41,14 @@ export default function Rankings() {
   const sentinel = useRef<HTMLDivElement>(null);
   const strip = useRef<HTMLDivElement>(null);
   useBorrowMode(cat.mode);
+
+  // A client-side route change sets the hash after the first render, and a hash-only link fires no remount. Re-read it in both cases.
+  useEffect(() => {
+    const sync = () => setId(fromHash());
+    sync();
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, []);
 
   useEffect(() => {
     const el = sentinel.current;
@@ -99,6 +108,7 @@ export default function Rankings() {
             ))}
           </h2>
           <p className="rk-cat-blurb">{cat.blurb}</p>
+          {cat.id === 'agents' && <NavLink href="/platforms" className="pf-cta">Pros, cons and how to use each platform →</NavLink>}
         </header>
 
         {cat.boards.length > 1 && (

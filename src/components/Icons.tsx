@@ -21,3 +21,4 @@ export const IconClose = ({ size = 16 }: P) => <svg {...S(size, 2)}><path d="M6 
 export const IconKey = ({ size = 16 }: P) => <svg {...S(size, 1.8)}><circle cx="8" cy="15" r="4" /><path d="M11 12l9-9M16 7l3 3M14 9l2 2" /></svg>;
 export const IconCheck = ({ size = 14 }: P) => <svg {...S(size, 2.2)}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;
 export const IconTrophy = ({ size = 20 }: P) => <svg {...S(size)}><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1.5A3.5 3.5 0 0 0 7.5 11M17 6h3v1.5A3.5 3.5 0 0 1 16.5 11M12 14v4M8.5 20h7" /></svg>;
+export const IconAgent = ({ size = 20 }: P) => <svg {...S(size)}><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><rect x="3" y="13" width="4" height="6" rx="1.6" /><rect x="17" y="13" width="4" height="6" rx="1.6" /><path d="M19 19a3 3 0 0 1-3 3h-3" /></svg>;

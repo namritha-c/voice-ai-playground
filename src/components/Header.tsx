@@ -15,7 +15,7 @@ const TABS: [Mode, string, string][] = [['tts', 'Text to Speech', 'TTS'], ['stt'
 export default function Header({ mode }: { mode: Mode | null }) {
   const router = useRouter();
   const go = useGo();
-  const onRankings = usePathname() === '/rankings';
+  const onRankings = ['/rankings', '/platforms'].includes(usePathname());
   useEffect(() => { TABS.forEach(([m]) => router.prefetch(`/${m}`)); }, [router]);
   const idx = mode ? TABS.findIndex((x) => x[0] === mode) : 0;
   const health = useQuery({ queryKey: ['health'], queryFn: api.health, refetchInterval: 15000, retry: false });

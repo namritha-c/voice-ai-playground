@@ -1,0 +1,74 @@
+/* ---------- platforms guide ---------- */
+/* Builds on the rk- panel, tab and title styles in rankings.css. Reads var(--accent), borrowed from the sts mode. */
+.pf-back { margin-bottom: 18px; font-size: 13px; color: var(--mute); text-decoration: none; transition: color .2s; }
+.pf-back:hover { color: var(--accent); }
+
+.pf-tabs { position: static; margin-top: 26px; }
+.pf-tabs .rk-tile { border-radius: 6px; }
+.pf-tabs .fchip:disabled { opacity: .55; cursor: not-allowed; }
+.pf-tabs .fchip:disabled:hover { border-color: var(--line-3); color: var(--ink-3); }
+.pf-soon { padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line-4); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.fchip.on .pf-soon { color: inherit; border-color: currentColor; opacity: .7; }
+
+.pf-head { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px 18px; }
+.pf-head .rk-tile { border-radius: 16px; }
+.pf-head .rk-by { margin-top: 10px; }
+.pf-head .rk-cat-blurb { grid-column: 1 / -1; }
+
+.pf-body { display: flex; flex-direction: column; gap: 20px; }
+.pf-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.pf-sec { display: flex; flex-direction: column; gap: 14px; padding: 24px 26px; }
+.pf-sub { margin-top: 6px; }
+
+.pf-list, .pf-bullets, .pf-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.pf-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; line-height: 1.5; color: var(--ink-3); }
+.pf-list svg { flex-shrink: 0; margin-top: 4px; }
+.pf-list.pro svg { color: var(--stt); }
+.pf-list.con svg { color: var(--danger); }
+
+.pf-bullets li { position: relative; padding-left: 18px; font-size: 14.5px; line-height: 1.5; color: var(--ink-3); }
+.pf-bullets li::before { content: ''; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.pf-bullets.mute li { color: var(--ink-4); }
+.pf-bullets.mute li::before { background: var(--mute-3); }
+
+.pf-steps { gap: 18px; }
+.pf-steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 14px; }
+.pf-n { font-size: 30px; line-height: 1; font-style: italic; color: var(--accent); font-variation-settings: 'opsz' 48, 'wght' 340, 'SOFT' 100, 'WONK' 1; }
+.pf-step { font-family: var(--serif); font-size: 18px; font-weight: 400; letter-spacing: -.01em; font-variation-settings: 'opsz' 24, 'wght' 420; }
+.pf-steps p { margin: 4px 0 0; max-width: 72ch; font-size: 14px; line-height: 1.55; color: var(--ink-4); }
+.pf-code { margin: 10px 0 0; padding: 12px 14px; overflow-x: auto; border-radius: 12px; border: 1px solid var(--glass-line); background: var(--gl-well, rgba(0, 0, 0, .3)); font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+
+.pf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.pf-feat { padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .03); transition: border-color .25s, background .25s; }
+.pf-feat:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.pf-feat b { display: block; font-size: 17px; font-weight: 400; letter-spacing: -.01em; font-variation-settings: 'opsz' 24, 'wght' 440; }
+.pf-feat p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-4); }
+
+.pf-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.pf-links .rk-try { text-decoration: none; }
+
+/* Entry point on the Agent platforms tab of Rankings. */
+.pf-cta {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border-radius: 999px; text-decoration: none;
+  font-size: 13.5px; color: var(--ink); border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 60%), color-mix(in srgb, var(--accent) 18%, rgba(24, 21, 18, .4));
+  box-shadow: var(--gl-rim), 0 0 18px -8px var(--accent-glow); font-variation-settings: 'wdth' 92, 'wght' 540;
+  transition: background .25s, transform .2s var(--ease); animation: rkRise .8s var(--ease) .3s both;
+}
+.pf-cta:hover { background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 60%), color-mix(in srgb, var(--accent) 30%, rgba(24, 21, 18, .4)); }
+.pf-cta:active { transform: scale(.98); }
+
+@media (prefers-reduced-motion: reduce) { .pf-cta { animation: none; } }
+
+@media (max-width: 767px) {
+  .pf-tabs { margin: 18px -16px 0; padding: 10px 16px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .pf-tabs .fchip { flex: 0 0 auto; white-space: nowrap; }
+  .pf-head .rk-tile { width: 44px !important; height: 44px !important; border-radius: 12px; }
+  .pf-two { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .pf-body { gap: 16px; }
+  .pf-sec { padding: 18px 16px; }
+  .pf-steps li { grid-template-columns: 26px minmax(0, 1fr); gap: 10px; }
+  .pf-n { font-size: 24px; }
+  .pf-grid { grid-template-columns: minmax(0, 1fr); }
+  .pf-back { flex-basis: 100%; margin-bottom: 0; }
+}
