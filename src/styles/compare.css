@@ -1,0 +1,47 @@
+/* ---------- compare page ---------- */
+/* Builds on the rk- panel, title and tag styles in rankings.css, and .pf-back from platforms.css. */
+.cmp-panel { padding: 8px 14px 14px; }
+.cmp-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.cmp-table th, .cmp-table td { text-align: left; vertical-align: top; font-weight: 400; }
+.cmp-table thead th { padding: 18px 16px 16px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.cmp-corner { width: 28%; vertical-align: bottom !important; }
+.cmp-who { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.cmp-who .rk-name { transition: color .2s; }
+.cmp-who:hover .rk-name { color: var(--accent); }
+
+.cmp-group th { padding: 22px 16px 8px; }
+.cmp-group .rk-k { color: var(--accent); }
+
+.cmp-table tbody tr:not(.cmp-group) > * { padding: 14px 16px; border-top: 1px solid rgba(255, 255, 255, .07); }
+.cmp-table tbody tr:not(.cmp-group):hover > * { background: rgba(255, 255, 255, .04); }
+.cmp-group + tr > * { border-top-color: transparent !important; }
+
+.cmp-label { display: table-cell; }
+.cmp-l { display: block; font-family: var(--serif); font-size: 17px; letter-spacing: -.01em; font-variation-settings: 'opsz' 24, 'wght' 420; }
+.cmp-hint { display: block; margin-top: 3px; font-size: 12.5px; color: var(--mute-2); }
+.cmp-label .rk-flag { margin-top: 8px; font-size: 12px; }
+
+.cmp-table td { position: relative; }
+.cmp-v { display: block; font-family: var(--mono); font-size: 14px; color: var(--ink); }
+.cmp-note { display: block; margin-top: 5px; max-width: 46ch; font-size: 13px; line-height: 1.5; color: var(--ink-4); }
+.cmp-table td.win { background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 85%); }
+.cmp-table td.win::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 2px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+.cmp-table td.win .cmp-v { color: var(--accent); }
+
+/* Phone: each row becomes a small card. The platform name comes from data-who. */
+@media (max-width: 767px) {
+  .cmp-panel { padding: 4px 12px 12px; }
+  .cmp-table, .cmp-table tbody, .cmp-table tr, .cmp-table th, .cmp-table td { display: block; width: auto; }
+  .cmp-table thead { display: none; }
+  .cmp-group th { padding: 18px 4px 4px; }
+  .cmp-table tbody tr:not(.cmp-group) { padding: 12px 4px; border-top: 1px solid rgba(255, 255, 255, .08); }
+  .cmp-table tbody tr:not(.cmp-group) > * { padding: 0; border-top: 0; background: none !important; }
+  .cmp-group + tr { border-top-color: transparent !important; }
+  .cmp-label { margin-bottom: 8px; }
+  .cmp-table td { padding: 8px 10px !important; margin-top: 6px; border-radius: 10px; background: rgba(255, 255, 255, .03) !important; }
+  .cmp-table td::after { content: attr(data-who); position: absolute; top: 9px; right: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--mute-2); }
+  .cmp-table td.win { background: color-mix(in srgb, var(--accent) 12%, transparent) !important; }
+  .cmp-table td.win::before { top: 10px; bottom: 10px; }
+  .cmp-v { padding-right: 80px; font-size: 13.5px; }
+  .cmp-note { font-size: 12.5px; }
+}

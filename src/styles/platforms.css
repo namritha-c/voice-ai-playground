@@ -2,6 +2,8 @@
 /* Builds on the rk- panel, tab and title styles in rankings.css. Reads var(--accent), borrowed from the sts mode. */
 .pf-back { margin-bottom: 18px; font-size: 13px; color: var(--mute); text-decoration: none; transition: color .2s; }
 .pf-back:hover { color: var(--accent); }
+.pf-nav { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-bottom: 18px; }
+.pf-nav .pf-back { margin-bottom: 0; }
 
 .pf-tabs { position: static; margin-top: 26px; }
 .pf-tabs .rk-tile { border-radius: 6px; }
@@ -71,4 +73,6 @@
   .pf-n { font-size: 24px; }
   .pf-grid { grid-template-columns: minmax(0, 1fr); }
   .pf-back { flex-basis: 100%; margin-bottom: 0; }
+  .pf-nav { flex-basis: 100%; flex-direction: row; justify-content: space-between; margin-bottom: 0; }
+  .pf-nav .pf-back { flex-basis: auto; }
 }

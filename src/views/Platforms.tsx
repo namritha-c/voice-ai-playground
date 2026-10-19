@@ -108,7 +108,10 @@ export default function Platforms() {
           </div>
         </div>
         <div style={{ flexGrow: 1 }} />
-        <NavLink href="/rankings#agents" className="pf-back">← Agent platform rankings</NavLink>
+        <div className="pf-nav">
+          <NavLink href="/rankings#agents" className="pf-back">← Agent platform rankings</NavLink>
+          <NavLink href="/compare" className="pf-back">Compare side by side →</NavLink>
+        </div>
       </div>
 
       <div className="rk-tabs pf-tabs" role="group" aria-label="Platform">
